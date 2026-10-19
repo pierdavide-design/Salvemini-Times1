@@ -1,45 +1,35 @@
 @import "tailwindcss";
 
-/* Sovrascrive la scrollbar bianca di sistema con una sottile e scura */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+:root {
+  color-scheme: dark;
 }
 
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
+/* Forzatura azzeramento scrollbar su tutti i selettori */
+html,
+body,
+div,
+aside,
+main,
+section,
+* {
+  -ms-overflow-style: none !important; /* Edge / IE */
+  scrollbar-width: none !important; /* Firefox */
 }
 
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 9999px;
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar,
+aside::-webkit-scrollbar,
+main::-webkit-scrollbar,
+section::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #c5a46d;
-}
-
-/* Classe per nascondere del tutto la barra mantenendo lo scorrimento attivo */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Scrollbar personalizzata per la sidebar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #111111;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 9999px;
-}
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #27272a #111111;
+html, body {
+  background-color: #0a0a0a;
+  color: #ffffff;
 }
