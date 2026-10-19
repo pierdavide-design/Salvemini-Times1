@@ -8,7 +8,7 @@ import {
   ArrowLeft, PenLine, FileText, Download, LayoutTemplate,
   Bold, Italic, Underline, Highlighter, Palette, 
   AlignLeft, AlignCenter, List, Quote, Image as ImageIcon, Sparkles,
-  Video, UploadCloud
+  Video, UploadCloud, Loader2, RefreshCw
 } from "lucide-react";
 
 function RedazioneWorkspace() {
@@ -23,16 +23,17 @@ function RedazioneWorkspace() {
   const [category, setCategory] = useState("Vita scolastica");
   const [contentHtml, setContentHtml] = useState("");
   const [coverPreview, setCoverPreview] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Stato Video / Reel
   const [videoUrl, setVideoUrl] = useState("");
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   // Configurazione Pagina & Layout
-  const [pageLayout, setPageLayout] = useState("dynamic"); // 'dynamic' | 'a4'
+  const [pageLayout, setPageLayout] = useState("dynamic");
   const [fontFamily, setFontFamily] = useState("font-sans");
   const [fontSize, setFontSize] = useState("16px");
-  const [editorTheme, setEditorTheme] = useState("dark"); // 'dark' | 'light' | 'sepia'
+  const [editorTheme, setEditorTheme] = useState("dark");
 
   // Stato Interfaccia
   const [mode, setMode] = useState("editor"); // 'editor' | 'video' | 'preview' | 'import'
@@ -41,10 +42,10 @@ function RedazioneWorkspace() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedSuccess, setPublishedSuccess] = useState(false);
 
-  // Riferimento Canvas ContentEditable (WYSIWYG)
+  // Canvas ContentEditable
   const editorRef = useRef(null);
 
-  // Modale Immagine
+  // Modale Immagine Inline
   const [showImageModal, setShowImageModal] = useState(false);
   const [inlineImageUrl, setInlineImageUrl] = useState("");
   const [inlineImageCaption, setInlineImageCaption] = useState("");
@@ -63,20 +64,9 @@ function RedazioneWorkspace() {
   const [isAnalyzingFile, setIsAnalyzingFile] = useState(false);
 
   const categoriesList = [
-    "Vita scolastica",
-    "Gossip",
-    "Hot",
-    "Attualità",
-    "Tecnologia",
-    "Sport",
-    "Cultura",
-    "Interviste",
-    "Eventi",
-    "Mondo",
-    "Politica",
-    "Gaming",
-    "Musica",
-    "Cinema",
+    "Vita scolastica", "Gossip", "Hot", "Attualità", "Tecnologia",
+    "Sport", "Cultura", "Interviste", "Eventi", "Mondo", "Politica",
+    "Gaming", "Musica", "Cinema",
   ];
 
   const themeClasses = {
@@ -87,7 +77,29 @@ function RedazioneWorkspace() {
 
   const currentTheme = themeClasses[editorTheme];
 
-  // Sincronizzazione automatica tra Stato React e foglio di scrittura
+  // Upload file su Supabase Storage (Bucket 'article-covers')
+  const uploadImageToStorage = async (file) => {
+    if (!file) return null;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+    const filePath = `covers/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("article-covers")
+      .upload(filePath, file, { cacheControl: "3600", upsert: true });
+
+    if (uploadError) {
+      throw new Error("Impossibile caricare l'immagine nel cloud: " + uploadError.message);
+    }
+
+    const { data } = supabase.storage
+      .from("article-covers")
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   useEffect(() => {
     if (mode === "editor" && editorRef.current && contentHtml !== editorRef.current.innerHTML) {
       editorRef.current.innerHTML = contentHtml;
@@ -95,7 +107,6 @@ function RedazioneWorkspace() {
     }
   }, [mode, contentHtml]);
 
-  // Caricamento Articolo / Bozza / Video da Supabase
   useEffect(() => {
     async function loadArticle() {
       if (!editId) return;
@@ -124,7 +135,6 @@ function RedazioneWorkspace() {
     loadArticle();
   }, [editId]);
 
-  // Upload diretto video su Supabase Storage (Bucket 'videos')
   const handleDirectVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -134,7 +144,7 @@ function RedazioneWorkspace() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('videos')
         .upload(fileName, file);
 
@@ -146,7 +156,7 @@ function RedazioneWorkspace() {
 
       setVideoUrl(publicUrl);
     } catch (err) {
-      alert("⚠️ Impossibile caricare il video nel cloud. Verificare la configurazione del bucket Supabase 'videos': " + err.message);
+      alert("⚠️ Errore caricamento video: " + err.message);
     } finally {
       setIsUploadingVideo(false);
     }
@@ -170,7 +180,6 @@ function RedazioneWorkspace() {
     });
   };
 
-  // Esecuzione Comandi Formattazione Visiva (WYSIWYG Word)
   const executeCommand = (command, value = null) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
@@ -183,7 +192,6 @@ function RedazioneWorkspace() {
     executeCommand("insertHTML", htmlContent);
   };
 
-  // Inserimento Immagine Inline
   const handleInsertInlineImage = (url, caption = "") => {
     if (!url) return;
     const imgHtml = `
@@ -199,18 +207,22 @@ function RedazioneWorkspace() {
     setInlineImageCaption("");
   };
 
-  const handleInlineImageFileUpload = (e) => {
+  const handleInlineImageFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      handleInsertInlineImage(reader.result, file.name.replace(/\.[^/.]+$/, ""));
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingImage(true);
+    try {
+      const publicUrl = await uploadImageToStorage(file);
+      handleInsertInlineImage(publicUrl, file.name.replace(/\.[^/.]+$/, ""));
+    } catch (err) {
+      alert("⚠️ " + err.message);
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
-  // SALVATAGGIO BOZZA SU SUPABASE
+  // SALVATAGGIO BOZZA
   const handleSaveDraft = async () => {
     setIsDrafting(true);
     try {
@@ -245,16 +257,15 @@ function RedazioneWorkspace() {
       if (error) throw error;
 
       if (data?.id) setArticleId(data.id);
-      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      setLastSavedTime(nowTime);
+      setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     } catch (err) {
-      alert("⚠️ Errore durante il salvataggio: " + err.message);
+      alert("⚠️ Errore salvataggio: " + err.message);
     } finally {
       setIsDrafting(false);
     }
   };
 
-  // PUBBLICAZIONE SU SUPABASE CON MODERAZIONE IA
+  // PUBBLICAZIONE
   const handlePublish = async () => {
     if (!title.trim()) {
       alert("⚠️ Inserisci un titolo prima di pubblicare.");
@@ -269,7 +280,6 @@ function RedazioneWorkspace() {
     setIsPublishing(true);
 
     try {
-      // Moderazione IA
       const modRes = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -316,22 +326,22 @@ function RedazioneWorkspace() {
       setPublishedSuccess(true);
       setTimeout(() => router.push("/profilo"), 1200);
     } catch (err) {
-      alert("⚠️ Errore durante la pubblicazione: " + err.message);
+      alert("⚠️ Errore pubblicazione: " + err.message);
     } finally {
       setIsPublishing(false);
     }
   };
 
-  // CO-PILOTA IA SCRITTURA MIGLIORATO
+  // EXECUTE IA COPILOT
   const handleRunAiCopilot = async () => {
     setIsAiGenerating(true);
 
     try {
       let finalPrompt = aiPrompt;
       if (aiActionType === "rewrite") {
-        finalPrompt = `Riformula e arricchisci questo intero testo mantenendo un registro accattivante. Correggi la grammatica e formattalo in modo magistrale:\n\n"${contentHtml}"`;
+        finalPrompt = `Riformula e arricchisci questo testo mantenendo un registro accattivante e scorrevole. Correggi la grammatica e formattalo in modo magistrale:\n\n"${contentHtml}"`;
       } else if (aiActionType === "expand") {
-        finalPrompt = `Espandi e approfondisci le idee contenute in questo testo fornendo dettagli e nuove chiavi di lettura:\n\n"${contentHtml}"`;
+        finalPrompt = `Espandi e approfondisci le idee contenute in questo testo fornendo dettagli, contesto e nuove chiavi di lettura articolate:\n\n"${contentHtml}"`;
       } else if (aiActionType === "summary") {
         finalPrompt = `Crea un sottotitolo o sommario efficace in 2 frasi ad impatto basato su questo testo:\n\n"${contentHtml}"`;
       } else if (aiActionType === "titles") {
@@ -378,7 +388,7 @@ function RedazioneWorkspace() {
     }
   };
 
-  // ANALISI ED IMPORTAZIONE DOCUMENTI
+  // ANALISI E CONVERSIONE DOCUMENTI
   const handleAnalyzeFileWithAi = async () => {
     if (!docFile) return;
     setIsAnalyzingFile(true);
@@ -386,7 +396,7 @@ function RedazioneWorkspace() {
     try {
       const fileName = docFile.name.toLowerCase();
 
-      // 1. FILE DI TESTO SEMPLICE
+      // File di testo semplice
       if (fileName.endsWith(".txt") || fileName.endsWith(".md")) {
         const textRaw = await readTextFile(docFile);
         const lines = textRaw.split('\n');
@@ -406,7 +416,7 @@ function RedazioneWorkspace() {
         return;
       }
 
-      // 2. ANALISI COMPLETA CON GEMINI
+      // Analisi avanzata PDF / Word
       const base64File = await convertFileToBase64(docFile);
       
       let mimeType = docFile.type;
@@ -449,7 +459,20 @@ function RedazioneWorkspace() {
     }
   };
 
-  const onDropCover = useCallback((acc) => { if (acc[0]) setCoverPreview(URL.createObjectURL(acc[0])) }, []);
+  const onDropCover = useCallback(async (acceptedFiles) => {
+    if (acceptedFiles[0]) {
+      setIsUploadingImage(true);
+      try {
+        const publicUrl = await uploadImageToStorage(acceptedFiles[0]);
+        setCoverPreview(publicUrl);
+      } catch (err) {
+        alert("⚠️ " + err.message);
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+  }, []);
+
   const { getRootProps: getCoverRP, getInputProps: getCoverIP, isDragActive: isCoverDA } = useDropzone({
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
     maxFiles: 1,
@@ -481,54 +504,23 @@ function RedazioneWorkspace() {
 
   return (
     <div className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col font-sans antialiased">
-      
-      {/* 1. BARRA SUPERIORE PROFESSIONALE */}
       <header className="bg-[#111115] border-b border-zinc-800/80 sticky top-0 z-40 shadow-xl">
         <div className="px-6 py-2 flex items-center justify-between border-b border-zinc-800/60">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/profilo")}
-              className="text-xs text-zinc-400 hover:text-white transition font-medium flex items-center gap-1.5"
-            >
-              ← Profilo
-            </button>
+            <button onClick={() => router.push("/profilo")} className="text-xs text-zinc-400 hover:text-white transition font-medium">← Profilo</button>
             <span className="text-zinc-700">|</span>
-            <span className="font-serif font-bold text-[#C5A46D] text-sm tracking-wide">
-              Salvemini Studio Pro
-            </span>
+            <span className="font-serif font-bold text-[#C5A46D] text-sm tracking-wide">Salvemini Studio Pro</span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex bg-[#0A0A0C] border border-zinc-800 p-0.5 rounded-xl text-xs">
-              <button
-                onClick={() => setPageLayout("dynamic")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
-                  pageLayout === "dynamic" ? "bg-[#C5A46D] text-black" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                📜 Pagina Singola
-              </button>
-              <button
-                onClick={() => setPageLayout("a4")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
-                  pageLayout === "a4" ? "bg-[#C5A46D] text-black" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                📄 Fogli A4
-              </button>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-1 bg-[#0A0A0C] border border-zinc-800 p-0.5 rounded-xl text-xs">
-              <button onClick={() => setEditorTheme("dark")} className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${editorTheme === "dark" ? "bg-zinc-700 text-white" : "text-zinc-400"}`}>Dark</button>
-              <button onClick={() => setEditorTheme("sepia")} className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${editorTheme === "sepia" ? "bg-[#8C4A27] text-white" : "text-zinc-400"}`}>Sepia</button>
-              <button onClick={() => setEditorTheme("light")} className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${editorTheme === "light" ? "bg-white text-black" : "text-zinc-400"}`}>Light</button>
+              <button onClick={() => setPageLayout("dynamic")} className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${pageLayout === "dynamic" ? "bg-[#C5A46D] text-black" : "text-zinc-400 hover:text-white"}`}>📜 Pagina Singola</button>
+              <button onClick={() => setPageLayout("a4")} className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${pageLayout === "a4" ? "bg-[#C5A46D] text-black" : "text-zinc-400 hover:text-white"}`}>📄 Fogli A4</button>
             </div>
 
             <div className="text-xs font-mono">
               {lastSavedTime ? (
-                <span className="text-emerald-400 flex items-center gap-1 bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-800/50">
-                  ✓ Salvato alle {lastSavedTime}
-                </span>
+                <span className="text-emerald-400 flex items-center gap-1 bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-800/50">✓ Salvato alle {lastSavedTime}</span>
               ) : (
                 <span className="text-zinc-500">Bozza non salvata</span>
               )}
@@ -536,137 +528,40 @@ function RedazioneWorkspace() {
           </div>
         </div>
 
-        {/* 2. TOOLBAR FORMATTAZIONE CON MODALITÀ TESTO / VIDEO / ANTEPRIMA / IMPORTA */}
         <div className="px-6 py-2 flex flex-wrap items-center justify-between gap-3 bg-[#16161C] overflow-x-auto no-scrollbar">
-          
           <div className="flex bg-[#0A0A0C] border border-zinc-800 p-1 rounded-xl text-xs font-semibold shrink-0">
-            <button
-              onClick={() => setMode("editor")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "editor" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}
-            >
-              <PenLine size={14} /> Scrittura
-            </button>
-
-            <button
-              onClick={() => setMode("video")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "video" ? "bg-red-950/80 text-red-400 border border-red-800/60 shadow" : "text-zinc-400 hover:text-white"}`}
-            >
-              <Video size={14} /> Video / Reel
-            </button>
-
-            <button
-              onClick={() => setMode("preview")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "preview" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}
-            >
-              <LayoutTemplate size={14} /> Anteprima
-            </button>
-
-            <button
-              onClick={() => setMode("import")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "import" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}
-            >
-              <Download size={14} /> Importa File
-            </button>
+            <button onClick={() => setMode("editor")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "editor" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}><PenLine size={14} /> Scrittura</button>
+            <button onClick={() => setMode("video")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "video" ? "bg-red-950/80 text-red-400 border border-red-800/60 shadow" : "text-zinc-400 hover:text-white"}`}><Video size={14} /> Video / Reel</button>
+            <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "preview" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}><LayoutTemplate size={14} /> Anteprima</button>
+            <button onClick={() => setMode("import")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${mode === "import" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"}`}><Download size={14} /> Importa File</button>
           </div>
 
           {mode === "editor" && (
             <div className="flex items-center gap-1 bg-[#0A0A0C] border border-zinc-800 p-1.5 rounded-xl shrink-0">
-              
-              <select
-                value={fontFamily}
-                onChange={(e) => setFontFamily(e.target.value)}
-                className="bg-transparent text-zinc-300 font-medium rounded-lg px-2 py-1 text-[11px] focus:outline-none cursor-pointer hover:text-white transition"
-              >
-                <option value="font-sans" className="bg-[#111115] text-white">Inter (Sans-Serif)</option>
-                <option value="font-serif" className="bg-[#111115] text-white">Times / Serif</option>
-                <option value="font-mono" className="bg-[#111115] text-white">Monospazio</option>
-              </select>
-
-              <select
-                value={fontSize}
-                onChange={(e) => setFontSize(e.target.value)}
-                className="bg-transparent text-zinc-300 font-medium rounded-lg px-2 py-1 text-[11px] focus:outline-none cursor-pointer hover:text-white transition"
-              >
-                <option value="14px" className="bg-[#111115] text-white">14pt (Piccolo)</option>
-                <option value="16px" className="bg-[#111115] text-white">16pt (Normale)</option>
-                <option value="18px" className="bg-[#111115] text-white">18pt (Medio)</option>
-                <option value="22px" className="bg-[#111115] text-white">22pt (Grande)</option>
-              </select>
-
+              <button onClick={() => executeCommand("bold")} className="p-1.5 text-zinc-400 hover:text-white rounded-md" title="Grassetto"><Bold size={15} /></button>
+              <button onClick={() => executeCommand("italic")} className="p-1.5 text-zinc-400 hover:text-white rounded-md" title="Corsivo"><Italic size={15} /></button>
+              <button onClick={() => executeCommand("underline")} className="p-1.5 text-zinc-400 hover:text-white rounded-md" title="Sottolineato"><Underline size={15} /></button>
               <div className="w-px h-5 bg-zinc-800 mx-1.5" />
-
-              <button onClick={() => executeCommand("bold")} className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Grassetto"><Bold size={15} /></button>
-              <button onClick={() => executeCommand("italic")} className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Corsivo"><Italic size={15} /></button>
-              <button onClick={() => executeCommand("underline")} className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Sottolineato"><Underline size={15} /></button>
-
-              <div className="w-px h-5 bg-zinc-800 mx-1.5" />
-
-              <button onClick={() => executeCommand("hiliteColor", "#fef08a")} className="p-1.5 text-zinc-400 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-md transition" title="Evidenzia Giallo"><Highlighter size={15} /></button>
-              <button onClick={() => executeCommand("foreColor", "#C5A46D")} className="p-1.5 text-zinc-400 hover:text-[#C5A46D] hover:bg-[#C5A46D]/10 rounded-md transition" title="Testo Oro"><Palette size={15} /></button>
-
-              <div className="w-px h-5 bg-zinc-800 mx-1.5" />
-
-              <button onClick={() => executeCommand("justifyLeft")} className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Sinistra"><AlignLeft size={15} /></button>
-              <button onClick={() => executeCommand("justifyCenter")} className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Centro"><AlignCenter size={15} /></button>
-
-              <div className="w-px h-5 bg-zinc-800 mx-1.5" />
-
-              <button onClick={() => executeCommand("insertUnorderedList")} className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition" title="Elenco Puntato"><List size={14} /> Lista</button>
-              <button
-                onClick={() => insertHTMLBlock('<blockquote style="border-left: 4px solid #C5A46D; padding-left: 12px; margin: 16px 0; opacity: 0.85; font-style: italic;">“ Inserisci qui una citazione... ”</blockquote><p><br></p>')}
-                className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition"
-                title="Citazione"
-              >
-                <Quote size={14} /> Citazione
-              </button>
-
-              <div className="w-px h-5 bg-zinc-800 mx-1.5" />
-
-              <button
-                onClick={() => setShowImageModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 ml-1 text-[11px] font-semibold bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-lg border border-zinc-700 transition"
-              >
-                <ImageIcon size={14} /> Immagine
-              </button>
-
-              <button
-                onClick={() => {
-                  setAiActionType("custom");
-                  setShowAiModal(true);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 ml-1 text-[11px] font-bold bg-[#1A1A1A] text-[#C5A46D] hover:text-[#E2C792] hover:bg-[#222] rounded-lg border border-[#C5A46D]/30 shadow hover:border-[#C5A46D]/60 transition"
-              >
-                <Sparkles size={14} className="text-[#C5A46D]" /> Co-pilota IA
-              </button>
+              <button onClick={() => setShowImageModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-zinc-900 text-zinc-300 hover:text-white rounded-lg border border-zinc-700"><ImageIcon size={14} /> Immagine</button>
+              <button onClick={() => { setAiActionType("custom"); setShowAiModal(true); }} className="flex items-center gap-1.5 px-3 py-1.5 ml-1 text-[11px] font-bold bg-[#1A1A1A] text-[#C5A46D] hover:bg-[#222] rounded-lg border border-[#C5A46D]/30 shadow transition"><Sparkles size={14} /> Co-pilota IA</button>
             </div>
           )}
 
           <div className="flex items-center gap-2 text-xs ml-auto shrink-0 bg-[#0A0A0C] border border-zinc-800 px-3 py-1.5 rounded-xl">
             <span className="text-zinc-500 font-medium">Sezione:</span>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
-            >
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
               {categoriesList.map((cat) => (
                 <option key={cat} value={cat} className="bg-[#111115] text-white">{cat}</option>
               ))}
             </select>
           </div>
-
         </div>
       </header>
 
-      {/* 3. CANVAS DI SCRITTURA ED EDITING INTERATTIVO */}
       <main className="flex-1 p-4 sm:p-8 overflow-y-auto flex flex-col items-center bg-[#070709]">
-        
-        {/* MODALITÀ TESTO SCRITTURA */}
+        {/* MODALITÀ EDITOR SCRITTURA */}
         {mode === "editor" && (
-          <div
-            className={`w-full max-w-4xl ${currentTheme.bg} ${currentTheme.text} rounded-2xl shadow-2xl border ${currentTheme.border} p-8 sm:p-14 transition-all duration-300 ${
-              pageLayout === "dynamic" ? "min-h-[400px] h-auto" : "min-h-[1050px]"
-            }`}
-          >
+          <div className={`w-full max-w-4xl ${currentTheme.bg} ${currentTheme.text} rounded-2xl shadow-2xl border ${currentTheme.border} p-8 sm:p-14 transition-all duration-300 min-h-[400px]`}>
             <div className="space-y-4 mb-6 border-b border-current/15 pb-6">
               <input
                 type="text"
@@ -680,31 +575,23 @@ function RedazioneWorkspace() {
                 type="text"
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
-                placeholder="Sottotitolo o sommario dell'articolo (opzionale)..."
+                placeholder="Sottotitolo o sommario dell'articolo..."
                 className={`w-full text-lg font-serif italic text-[#C5A46D] ${currentTheme.placeholder} border-b border-current/10 pb-2 focus:outline-none bg-transparent`}
               />
 
-              {coverPreview ? (
+              {isUploadingImage ? (
+                <div className="h-40 rounded-xl border border-dashed border-[#C5A46D] bg-[#C5A46D]/10 flex items-center justify-center gap-2 text-xs font-bold text-[#C5A46D]">
+                  <Loader2 className="animate-spin" size={18} /> Caricamento immagine su Supabase Cloud...
+                </div>
+              ) : coverPreview ? (
                 <div className="relative rounded-xl overflow-hidden h-56 border border-current/20 group my-4">
                   <img src={coverPreview} alt="Copertina" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => setCoverPreview(null)}
-                    className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-lg text-xs shadow-lg hover:bg-red-700 transition"
-                  >
-                    🗑️ Rimuovi Copertina
-                  </button>
+                  <button onClick={() => setCoverPreview(null)} className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-lg text-xs shadow-lg hover:bg-red-700 transition">🗑️ Rimuovi Copertina</button>
                 </div>
               ) : (
-                <div
-                  {...getCoverRP()}
-                  className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition ${
-                    isCoverDA ? "border-[#C5A46D] bg-[#C5A46D]/10" : "border-current/20 hover:bg-black/5"
-                  }`}
-                >
+                <div {...getCoverRP()} className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${isCoverDA ? "border-[#C5A46D] bg-[#C5A46D]/10" : "border-current/20 hover:bg-black/5"}`}>
                   <input {...getCoverIP()} />
-                  <p className="text-xs opacity-70 font-medium flex items-center justify-center gap-2">
-                    <ImageIcon size={16} /> Trascina o clicca per caricare la copertina dell'articolo
-                  </p>
+                  <p className="text-xs opacity-70 font-medium flex items-center justify-center gap-2"><ImageIcon size={16} /> Clicca o trascina per caricare la copertina dal PC</p>
                 </div>
               )}
             </div>
@@ -712,94 +599,33 @@ function RedazioneWorkspace() {
             <div
               ref={editorRef}
               contentEditable
-              onInput={() => {
-                updateMetrics();
-                if (editorRef.current) setContentHtml(editorRef.current.innerHTML);
-              }}
+              onInput={() => { updateMetrics(); if (editorRef.current) setContentHtml(editorRef.current.innerHTML); }}
               style={{ fontSize: fontSize }}
-              className={`w-full min-h-[250px] focus:outline-none leading-relaxed ${fontFamily} placeholder-zinc-500 [&>p]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h2]:text-[#C5A46D] [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>strong]:font-extrabold [&>blockquote]:border-l-4 [&>blockquote]:border-[#C5A46D] [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4`}
+              className={`w-full min-h-[250px] focus:outline-none leading-relaxed ${fontFamily}`}
             />
           </div>
         )}
 
-        {/* MODALITÀ UPLOAD VIDEO / REEL PER SALVEMINI TV */}
+        {/* MODALITÀ UPLOAD VIDEO */}
         {mode === "video" && (
           <div className="w-full max-w-2xl bg-[#141417] border border-zinc-800 rounded-3xl p-8 space-y-6 shadow-2xl self-center my-auto">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-white flex justify-center items-center gap-2">
                 <Video size={24} className="text-red-400" /> Carica Video / Reel
               </h2>
-              <p className="text-xs text-zinc-400">
-                Pubblica un filmato per la sezione Salvemini TV. Carica un file MP4 dal tuo computer oppure inserisci il link.
-              </p>
+              <p className="text-xs text-zinc-400">Pubblica un filmato per la sezione Salvemini TV.</p>
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="text-xs text-zinc-400 block mb-1 font-semibold">Titolo del Video:</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Es. Dietro le quinte della festa di fine anno..."
-                  className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-zinc-400 block mb-1 font-semibold">Descrizione Breve:</label>
-                <textarea
-                  rows={2}
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  placeholder="Breve sommario per gli studenti..."
-                  className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
-                />
-              </div>
-
-              <div className="border-2 border-dashed border-zinc-800 hover:border-zinc-700 rounded-2xl p-6 text-center space-y-3 bg-[#0D0D10] transition">
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titolo del Video..." className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]" />
+              <textarea rows={2} value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Descrizione breve..." className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]" />
+              <div className="border-2 border-dashed border-zinc-800 hover:border-zinc-700 rounded-2xl p-6 text-center space-y-3 bg-[#0D0D10]">
                 <UploadCloud size={32} className="mx-auto text-[#C5A46D]" />
-                <p className="text-xs text-zinc-300 font-semibold">Carica file video MP4/WebM dal PC</p>
-                
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleDirectVideoUpload}
-                  className="hidden"
-                  id="video-file-input"
-                />
-                
-                <label
-                  htmlFor="video-file-input"
-                  className="inline-block bg-[#C5A46D] hover:bg-[#b5935c] text-black px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition shadow"
-                >
-                  {isUploadingVideo ? "Caricamento nel Cloud in corso..." : "📁 Sfoglia File Video"}
+                <input type="file" accept="video/*" onChange={handleDirectVideoUpload} className="hidden" id="video-file-input" />
+                <label htmlFor="video-file-input" className="inline-block bg-[#C5A46D] text-black px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition">
+                  {isUploadingVideo ? "Caricamento in corso..." : "📁 Sfoglia File Video"}
                 </label>
               </div>
-
-              <div className="text-center text-[10px] text-zinc-600 uppercase font-mono tracking-widest">— oppure incolla URL —</div>
-
-              <div>
-                <label className="text-xs text-zinc-400 block mb-1 font-semibold">URL Video / Link MP4 / YouTube:</label>
-                <input
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
-                />
-              </div>
-
-              {videoUrl && (
-                <div className="bg-[#0A0A0C] border border-zinc-800 p-3.5 rounded-2xl space-y-2">
-                  <p className="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5 font-bold">
-                    ✓ Video collegato e pronto alla pubblicazione
-                  </p>
-                  <div className="aspect-video rounded-xl overflow-hidden bg-black border border-zinc-800">
-                    <video src={videoUrl} controls className="w-full h-full object-cover" />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -807,191 +633,81 @@ function RedazioneWorkspace() {
         {/* MODALITÀ ANTEPRIMA */}
         {mode === "preview" && (
           <div className={`w-full max-w-4xl ${currentTheme.bg} ${currentTheme.text} rounded-2xl shadow-2xl border ${currentTheme.border} p-8 sm:p-12 min-h-[600px] space-y-6`}>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#D4B47C] bg-[#C5A46D]/15 px-3 py-1 rounded-full border border-[#C5A46D]/30">
-              {category}
-            </span>
-
-            <h1 className="text-4xl font-serif font-bold leading-tight">
-              {title || "Senza Titolo"}
-            </h1>
-
-            {subtitle && (
-              <p className="text-xl font-serif italic text-[#C5A46D]">
-                {subtitle}
-              </p>
-            )}
-
-            {videoUrl && (
-              <div className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-800 bg-black shadow-xl">
-                <video src={videoUrl} controls className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            {coverPreview && !videoUrl && (
-              <div className="w-full h-80 rounded-2xl overflow-hidden border border-current/20">
-                <img src={coverPreview} alt="Copertina" className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            <div
-              className={`leading-relaxed ${fontFamily} [&>p]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h2]:text-[#C5A46D] [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>strong]:font-extrabold [&>blockquote]:border-l-4 [&>blockquote]:border-[#C5A46D] [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4`}
-              style={{ fontSize: fontSize }}
-              dangerouslySetInnerHTML={{ __html: contentHtml }}
-            />
+            <span className="text-xs font-bold uppercase tracking-widest text-[#D4B47C] bg-[#C5A46D]/15 px-3 py-1 rounded-full border border-[#C5A46D]/30">{category}</span>
+            <h1 className="text-4xl font-serif font-bold leading-tight">{title || "Senza Titolo"}</h1>
+            {subtitle && <p className="text-xl font-serif italic text-[#C5A46D]">{subtitle}</p>}
+            {coverPreview && <div className="w-full h-80 rounded-2xl overflow-hidden border border-current/20"><img src={coverPreview} alt="Copertina" className="w-full h-full object-cover" /></div>}
+            <div className={`leading-relaxed ${fontFamily}`} style={{ fontSize: fontSize }} dangerouslySetInnerHTML={{ __html: contentHtml }} />
           </div>
         )}
 
-        {/* MODALITÀ IMPORTAZIONE */}
+        {/* MODALITÀ IMPORTAZIONE DOCUMENTO */}
         {mode === "import" && (
           <div className="w-full max-w-2xl bg-[#141417] border border-zinc-800 rounded-3xl p-8 space-y-6 shadow-2xl self-center my-auto">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-white flex justify-center items-center gap-2">
-                <FileText size={24} /> Importa Documento
+                <FileText size={24} /> Importa Documento (PDF / Word)
               </h2>
               <p className="text-xs text-zinc-400">
-                Converti file PDF, Word (.docx, .doc), Testo (.txt) e Markdown (.md) in un articolo formattato.
+                Converti e impagina automaticamente file PDF, Word (.docx), TXT o Markdown in un articolo completo.
               </p>
             </div>
 
-            <div
-              {...getDocRP()}
-              className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition ${
-                isDocDA ? "border-[#C5A46D] bg-[#C5A46D]/10" : "border-zinc-800 hover:bg-zinc-900"
-              }`}
-            >
+            <div {...getDocRP()} className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition ${isDocDA ? "border-[#C5A46D] bg-[#C5A46D]/10" : "border-zinc-800 hover:bg-zinc-900"}`}>
               <input {...getDocIP()} />
-              <div className="flex justify-center mb-4">
-                <FileText size={40} className="text-zinc-600" />
-              </div>
-              <p className="text-sm font-bold text-white">
-                {docFile ? docFile.name : "Trascina qui il file da convertire"}
-              </p>
+              <FileText size={40} className="mx-auto text-zinc-600 mb-3" />
+              <p className="text-sm font-bold text-white">{docFile ? docFile.name : "Trascina qui il file PDF o Word"}</p>
             </div>
 
             {docFile && (
               <div className="bg-[#0A0A0C] border border-zinc-800 p-5 rounded-2xl space-y-4">
                 <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={keepAllInfo}
-                    onChange={(e) => setKeepAllInfo(e.target.checked)}
-                    className="mt-1 accent-[#C5A46D]"
-                  />
+                  <input type="checkbox" checked={keepAllInfo} onChange={(e) => setKeepAllInfo(e.target.checked)} className="mt-1 accent-[#C5A46D]" />
                   <div>
-                    <p className="text-xs font-bold text-white">Mantiene tutto il testo originale (Verbatim)</p>
-                    <p className="text-[11px] text-zinc-500">Mantiene il 100% delle frasi trasformandole in un articolo impaginato.</p>
+                    <p className="text-xs font-bold text-white">Conserva integralmente tutto il contenuto originale</p>
+                    <p className="text-[11px] text-zinc-500">Mantiene l'esattezza e la completezza delle informazioni nel documento.</p>
                   </div>
                 </label>
 
-                <button
-                  onClick={handleAnalyzeFileWithAi}
-                  disabled={isAnalyzingFile}
-                  className="w-full bg-[#C5A46D] hover:bg-[#b5935c] text-black font-bold py-3 rounded-xl text-xs transition disabled:opacity-50 shadow"
-                >
-                  {isAnalyzingFile ? "Conversione con Gemini in corso..." : "🚀 Converti e Apri nell'Editor"}
+                <button onClick={handleAnalyzeFileWithAi} disabled={isAnalyzingFile} className="w-full bg-[#C5A46D] hover:bg-[#b5935c] text-black font-bold py-3 rounded-xl text-xs transition disabled:opacity-50 shadow">
+                  {isAnalyzingFile ? "Analisi ed elaborazione del documento in corso..." : "🚀 Converti e Apri nell'Editor"}
                 </button>
               </div>
             )}
           </div>
         )}
-
       </main>
 
-      {/* 4. BARRA DI STATO IN BASSO */}
-      <footer className="bg-[#111115] border-t border-zinc-800 px-6 py-3 sticky bottom-0 z-40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl">
-        
+      <footer className="bg-[#111115] border-t border-zinc-800 px-6 py-3 sticky bottom-0 z-40 flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-4 text-xs text-zinc-400 font-mono">
           <span>Parole: <strong className="text-white">{wordCount}</strong></span>
           <span>Caratteri: <strong className="text-white">{charCount}</strong></span>
-          <span>Tempo Lettura: <strong className="text-[#C5A46D]">{Math.ceil(wordCount / 200)} min</strong></span>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button
-            onClick={handleSaveDraft}
-            disabled={isDrafting}
-            className="flex-1 sm:flex-none bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-50"
-          >
+        <div className="flex items-center gap-3">
+          <button onClick={handleSaveDraft} disabled={isDrafting} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-50">
             {isDrafting ? "Salvataggio..." : "💾 Salva Bozza"}
           </button>
-
-          <button
-            onClick={handlePublish}
-            disabled={isPublishing || publishedSuccess}
-            className="flex-1 sm:flex-none bg-[#C5A46D] hover:bg-[#b5935c] text-black px-6 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-[#C5A46D]/20 disabled:opacity-50"
-          >
+          <button onClick={handlePublish} disabled={isPublishing || publishedSuccess} className="bg-[#C5A46D] hover:bg-[#b5935c] text-black px-6 py-2 rounded-xl text-xs font-bold transition shadow-lg disabled:opacity-50">
             {isPublishing ? "Verifica AI..." : publishedSuccess ? "✅ Pubblicato!" : "🚀 Pubblica Ora"}
           </button>
         </div>
       </footer>
 
-      {/* MODALE INSERISCI IMMAGINE INLINE */}
+      {/* MODALE IMMAGINE INLINE */}
       {showImageModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#141417] border border-zinc-800 rounded-3xl p-6 max-w-md w-full space-y-5 shadow-2xl">
             <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ImageIcon size={18} className="text-[#C5A46D]" /> Inserisci Immagine nel Foglio
-              </h3>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2"><ImageIcon size={18} className="text-[#C5A46D]" /> Inserisci Immagine nel Foglio</h3>
               <button onClick={() => setShowImageModal(false)} className="text-zinc-400 hover:text-white">✕</button>
             </div>
 
             <div className="space-y-2">
               <label className="text-xs text-zinc-400 font-medium block">Da file locale:</label>
-              <input
-                type="file"
-                ref={inlineImageInputRef}
-                accept="image/*"
-                onChange={handleInlineImageFileUpload}
-                className="hidden"
-              />
-              <button
-                onClick={() => inlineImageInputRef.current?.click()}
-                className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 py-2.5 rounded-xl text-xs font-semibold transition"
-              >
-                📁 Sfoglia immagini dal computer
-              </button>
-            </div>
-
-            <div className="text-center text-[10px] text-zinc-600 font-mono uppercase tracking-widest">— oppure —</div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-zinc-400 font-medium block mb-1">URL Immagine Web:</label>
-                <input
-                  type="url"
-                  placeholder="https://esempio.it/immagine.jpg"
-                  value={inlineImageUrl}
-                  onChange={(e) => setInlineImageUrl(e.target.value)}
-                  className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-zinc-400 font-medium block mb-1">Didascalia (Opzionale):</label>
-                <input
-                  type="text"
-                  placeholder="Es. Fotografia scattata durante l'evento"
-                  value={inlineImageCaption}
-                  onChange={(e) => setInlineImageCaption(e.target.value)}
-                  className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800">
-              <button
-                onClick={() => setShowImageModal(false)}
-                className="px-4 py-2 text-xs text-zinc-400 hover:text-white"
-              >
-                Annulla
-              </button>
-              <button
-                onClick={() => handleInsertInlineImage(inlineImageUrl, inlineImageCaption)}
-                disabled={!inlineImageUrl.trim()}
-                className="bg-[#C5A46D] hover:bg-[#b5935c] text-black font-bold px-5 py-2 rounded-xl text-xs transition disabled:opacity-50"
-              >
-                Inserisci
+              <input type="file" ref={inlineImageInputRef} accept="image/*" onChange={handleInlineImageFileUpload} className="hidden" />
+              <button onClick={() => inlineImageInputRef.current?.click()} disabled={isUploadingImage} className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                {isUploadingImage ? <Loader2 className="animate-spin" size={16} /> : "📁 Sfoglia e Carica nel Cloud"}
               </button>
             </div>
           </div>
@@ -1002,7 +718,6 @@ function RedazioneWorkspace() {
       {showAiModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#141417] border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
-            
             <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Sparkles size={18} className="text-[#C5A46D]" /> Co-pilota IA Redazione
@@ -1039,7 +754,7 @@ function RedazioneWorkspace() {
                   rows={3}
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="Es. Scrivi un paragrafo introduttivo sulle novità tecnologiche dell'anno..."
+                  placeholder="Es. Scrivi un approfondimento sui recenti sviluppi tecnologici..."
                   className="w-full bg-[#0A0A0C] border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A46D]"
                 />
               </div>
@@ -1060,12 +775,7 @@ function RedazioneWorkspace() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800">
-              <button
-                onClick={() => setShowAiModal(false)}
-                className="px-4 py-2 text-xs text-zinc-400 hover:text-white"
-              >
-                Annulla
-              </button>
+              <button onClick={() => setShowAiModal(false)} className="px-4 py-2 text-xs text-zinc-400 hover:text-white">Annulla</button>
               <button
                 onClick={handleRunAiCopilot}
                 disabled={isAiGenerating}
@@ -1074,11 +784,9 @@ function RedazioneWorkspace() {
                 {isAiGenerating ? "Elaborazione..." : "Genera con Gemini"}
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

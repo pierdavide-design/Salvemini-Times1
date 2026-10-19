@@ -17,26 +17,33 @@ export default function FeedbackPage() {
 
     setLoading(true);
 
-    // Recupera l'utente se loggato (opzionale)
-    const { data: { user } } = await supabase.auth.getUser();
+    try {
+      // 1. Recupera l'utente in modo sicuro dalla sessione
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUser = sessionData?.session?.user;
 
-    // Tabella corretta: 'feedback' (singolare)
-    const { error } = await supabase.from("feedback").insert([
-      { 
-        content, 
-        category,
-        user_id: user?.id || null,
-        is_read: false
+      // 2. Inserimento del messaggio nella tabella 'feedback'
+      const { error } = await supabase.from("feedback").insert([
+        { 
+          content: content.trim(), 
+          category: category || "Generale",
+          user_id: currentUser?.id || null,
+          is_read: false
+        }
+      ]);
+
+      if (error) {
+        throw new Error(error.message);
       }
-    ]);
 
-    if (!error) {
       setSent(true);
       setContent("");
-    } else {
-      alert("⚠️ Errore nell'invio del feedback: " + error.message);
+    } catch (err) {
+      console.error("❌ Errore invio feedback:", err);
+      alert("⚠️ Impossibile inviare il feedback: " + (err.message || "Errore di connessione"));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

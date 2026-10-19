@@ -13,7 +13,7 @@ export default function ProfiloPage() {
   const [nickname, setNickname] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bio, setBio] = useState("");
-  const [role, setRole] = useState("redattore");
+  const [role, setRole] = useState("studente");
   
   // Dati Articoli
   const [articles, setArticles] = useState([]);
@@ -37,30 +37,35 @@ export default function ProfiloPage() {
 
     async function loadUserData() {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user;
 
         if (!isMounted) return;
 
-        if (!user || error) {
+        if (!currentUser) {
           router.replace("/login");
           return;
         }
 
-        setUser(user);
-        setEmail(user.email ?? "");
+        setUser(currentUser);
+        setEmail(currentUser.email ?? "");
         
         // Recupera profilo reale e dinamico dalla tabella 'profiles'
         const { data: profData } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", currentUser.id)
           .maybeSingle();
 
-        const currentNick = profData?.nickname || user.user_metadata?.nickname || user.email?.split("@")[0] || "Utente";
-        const currentAvatar = profData?.avatar_url || user.user_metadata?.avatar_url || "";
-        const currentBio = profData?.bio || user.user_metadata?.bio || "Redattore per la testata digitale Salvemini Times.";
-        const currentRole = profData?.role || "redattore";
+        const currentNick = profData?.nickname || currentUser.user_metadata?.nickname || currentUser.email?.split("@")[0] || "Utente";
+        const currentAvatar = profData?.avatar_url || currentUser.user_metadata?.avatar_url || "";
+        const currentBio = profData?.bio || currentUser.user_metadata?.bio || "Membro della community di Salvemini Times.";
         
+        // Controllo email admin principale + ruolo DB
+        const isMainAdmin = currentUser.email?.toLowerCase() === "pierdavide.coppi@gmail.com";
+        const rawRole = profData?.role?.toLowerCase()?.trim() || "studente";
+        const currentRole = isMainAdmin ? "admin" : (rawRole === "user" ? "studente" : rawRole);
+
         setNickname(currentNick);
         setAvatarUrl(currentAvatar);
         setBio(currentBio);
@@ -71,7 +76,7 @@ export default function ProfiloPage() {
         setNewBio(currentBio);
         setLoading(false);
 
-        fetchUserArticles(user.id);
+        fetchUserArticles(currentUser.id);
       } catch {
         if (isMounted) router.replace("/login");
       }
@@ -167,15 +172,16 @@ export default function ProfiloPage() {
     if (!error) router.replace("/login");
   }
 
-  // Mappatura dinamica delle etichette del ruolo
+  // Mappatura dinamica delle etichette del ruolo (con supporto per 'user' e 'admin')
   const roleBadgeMap = {
     admin: { label: "Amministratore", icon: "🛡️", color: "bg-red-950/80 text-red-300 border-red-800/80" },
     caporedattore: { label: "Caporedattore", icon: "👑", color: "bg-purple-950/80 text-purple-300 border-purple-800/80" },
     redattore: { label: "Redattore", icon: "✍️", color: "bg-[#C5A46D]/15 text-[#D4B47C] border-[#C5A46D]/30" },
     studente: { label: "Studente", icon: "🎓", color: "bg-zinc-800 text-zinc-300 border-zinc-700" },
+    user: { label: "Studente", icon: "🎓", color: "bg-zinc-800 text-zinc-300 border-zinc-700" },
   };
 
-  const currentRoleBadge = roleBadgeMap[role] || roleBadgeMap.redattore;
+  const currentRoleBadge = roleBadgeMap[role] || roleBadgeMap.studente;
 
   // Filtro articoli in base a tab e ricerca
   const filteredArticles = articles.filter((art) => {
@@ -198,7 +204,7 @@ export default function ProfiloPage() {
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-zinc-400">
         <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 px-6 py-4 rounded-2xl shadow-xl">
           <div className="w-5 h-5 border-2 border-[#C5A46D] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Caricamento Area Redazione...</span>
+          <span className="text-sm font-medium">Caricamento Area Profilo...</span>
         </div>
       </div>
     );
@@ -220,7 +226,7 @@ export default function ProfiloPage() {
           
           <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-500 border-l border-zinc-800 pl-3">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Redazione Online</span>
+            <span>Profilo Utente Attivo</span>
           </div>
         </div>
 
@@ -283,6 +289,17 @@ export default function ProfiloPage() {
 
           {/* Azioni Rapide */}
           <div className="flex flex-wrap lg:flex-col gap-3 self-start lg:self-center w-full lg:w-auto">
+            {/* Se Admin, mostra anche l'accesso diretto al Pannello Admin */}
+            {role === "admin" && (
+              <button
+                onClick={() => router.push("/admin")}
+                className="bg-red-950/80 hover:bg-red-900 border border-red-800 text-red-300 font-bold px-6 py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs"
+              >
+                <span>🛡️</span>
+                <span>Pannello Amministratore</span>
+              </button>
+            )}
+
             <button
               onClick={() => router.push("/redazione")}
               className="flex-1 lg:flex-none bg-[#C5A46D] hover:bg-[#b5935c] text-black font-bold px-6 py-3.5 rounded-xl transition-all shadow-xl shadow-[#C5A46D]/15 flex items-center justify-center gap-2 text-sm"
@@ -358,7 +375,7 @@ export default function ProfiloPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span>📰</span> Gestione Articoli
+              <span>📰</span> Gestione Articoli Personali
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
               Filtra, cerca e gestisci le tue pubblicazioni su Salvemini Times.
@@ -367,8 +384,6 @@ export default function ProfiloPage() {
 
           {/* Filtri Tab e Barra di Ricerca */}
           <div className="flex flex-wrap items-center gap-3">
-            
-            {/* Ricerca */}
             <div className="relative flex-1 sm:flex-none">
               <input
                 type="text"
@@ -379,7 +394,6 @@ export default function ProfiloPage() {
               />
             </div>
 
-            {/* Tabs Stato */}
             <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
               <button
                 onClick={() => setFilterTab("all")}
@@ -407,7 +421,6 @@ export default function ProfiloPage() {
               </button>
             </div>
 
-            {/* Toggle Griglia / Lista */}
             <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs hidden sm:flex">
               <button
                 onClick={() => setViewMode("grid")}
@@ -424,7 +437,6 @@ export default function ProfiloPage() {
                 ☰
               </button>
             </div>
-
           </div>
         </div>
 
@@ -453,7 +465,6 @@ export default function ProfiloPage() {
             </button>
           </div>
         ) : viewMode === "grid" ? (
-          /* VISTA A GRIGLIA (CARD) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredArticles.map((art) => (
               <div
@@ -519,7 +530,6 @@ export default function ProfiloPage() {
             ))}
           </div>
         ) : (
-          /* VISTA A LISTA (TABELLA) */
           <div className="space-y-3">
             {filteredArticles.map((art) => (
               <div

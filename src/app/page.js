@@ -35,6 +35,33 @@ import {
   Eye,
 } from "lucide-react";
 
+// Componente SafeImage per il caricamento sicuro e con fallback/debug delle immagini
+function SafeImage({ src, alt, className, fallbackIcon = "📰" }) {
+  const [imgError, setImgError] = useState(false);
+
+  const isValidUrl = src && typeof src === "string" && src.trim() !== "" && src !== "EMPTY";
+
+  if (!isValidUrl || imgError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-4xl text-zinc-700 bg-zinc-900 border border-zinc-800">
+        {fallbackIcon}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt || "Copertina"}
+      className={className}
+      onError={() => {
+        console.warn("⚠️ Immagine non caricata (URL scaduto, 404 o CORS bloccato):", src);
+        setImgError(true);
+      }}
+    />
+  );
+}
+
 function Logo({ className = "h-9 w-auto" }) {
   return (
     <svg
@@ -467,7 +494,7 @@ export default function HomePage() {
       {/* CONTENUTO PRINCIPALE */}
       <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
-        {/* NAVBAR (mostra solo il titolo in testo Serif per evitare doppi loghi con la Sidebar) */}
+        {/* NAVBAR */}
         <header className="h-16 border-b border-zinc-800/80 flex items-center justify-between px-4 sm:px-8 bg-[#0A0A0A]/90 backdrop-blur sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
@@ -541,16 +568,13 @@ export default function HomePage() {
                 <div className="h-full rounded-3xl bg-[#151515] border border-zinc-800 p-5 sm:p-8 flex flex-col justify-between hover:border-[#C5A46D]/60 transition-all duration-300 shadow-xl relative overflow-hidden">
                   <div>
                     <div className="relative w-full h-52 sm:h-72 rounded-2xl overflow-hidden mb-6 bg-zinc-900 border border-zinc-800/80">
-                      {trendingArticle.cover_url ? (
-                        <img
-                          src={trendingArticle.cover_url}
-                          alt={trendingArticle.title}
-                          className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl text-zinc-700">📰</div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/40" />
+                      <SafeImage
+                        src={trendingArticle.cover_url}
+                        alt={trendingArticle.title}
+                        className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-500"
+                        fallbackIcon="📰"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/40 pointer-events-none" />
 
                       <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1.5 bg-[#C5A46D] text-black font-bold text-xs px-3.5 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
@@ -806,18 +830,13 @@ export default function HomePage() {
                     className="bg-[#18181C] border border-zinc-800/80 rounded-xl overflow-hidden group hover:border-[#C5A46D]/60 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                   >
                     <div className="relative aspect-video bg-zinc-900 overflow-hidden">
-                      {vid.cover_url ? (
-                        <img
-                          src={vid.cover_url}
-                          alt={vid.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700">
-                          <Video size={28} />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <SafeImage
+                        src={vid.cover_url}
+                        alt={vid.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
+                        fallbackIcon="🎥"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
                       
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#C5A46D] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -912,7 +931,7 @@ export default function HomePage() {
                           className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition border ${
                             userLikedVideos[selectedVideoModal.id]
                               ? "bg-red-950/80 text-red-400 border-red-800/80"
-                              : "bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700"
+                              : "bg-[#18181C] hover:bg-zinc-700 text-white border-zinc-700"
                           }`}
                         >
                           <ThumbsUp size={14} className={userLikedVideos[selectedVideoModal.id] ? "fill-red-400" : ""} />
@@ -972,17 +991,12 @@ export default function HomePage() {
                           className="flex gap-2.5 p-2 rounded-xl bg-[#16161A] hover:bg-zinc-800/80 border border-zinc-800/60 transition cursor-pointer group"
                         >
                           <div className="relative w-24 h-16 bg-zinc-900 rounded-lg overflow-hidden shrink-0">
-                            {nextVid.cover_url ? (
-                              <img
-                                src={nextVid.cover_url}
-                                alt={nextVid.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform opacity-85"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600">
-                                <Video size={16} />
-                              </div>
-                            )}
+                            <SafeImage
+                              src={nextVid.cover_url}
+                              alt={nextVid.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform opacity-85"
+                              fallbackIcon="🎥"
+                            />
                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                               <Play size={12} className="fill-white text-white" />
                             </div>
@@ -1042,16 +1056,13 @@ export default function HomePage() {
                 <Link key={article.id} href={`/articolo/${article.id}`}>
                   <div className="bg-[#151515] rounded-3xl overflow-hidden border border-zinc-800 hover:border-[#C5A46D]/60 hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col group">
                     <div className="h-48 relative overflow-hidden bg-zinc-900">
-                      {article.cover_url ? (
-                        <img
-                          src={article.cover_url}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl text-zinc-700">📄</div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/20" />
+                      <SafeImage
+                        src={article.cover_url}
+                        alt={article.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                        fallbackIcon="📰"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/20 pointer-events-none" />
                       
                       <span className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-wider text-[#C5A46D] bg-[#111111]/80 backdrop-blur px-3 py-1 rounded-full border border-zinc-800">
                         {article.category || "Generale"}

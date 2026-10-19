@@ -52,51 +52,75 @@ export default function AdminPanelPage() {
   });
 
   const fetchAllData = useCallback(async () => {
-    // 1. Articoli con profili autori (alias esplicito profiles:user_id)
-    const { data: artData, error: artErr } = await supabase
-      .from("articles")
-      .select("*, profiles:user_id(id, nickname, avatar_url, role)")
-      .order("created_at", { ascending: false });
+    // 1. Fetch Articoli (con fallback sicuro)
+    try {
+      let { data: artData, error: artErr } = await supabase
+        .from("articles")
+        .select("*, profiles:user_id(id, nickname, avatar_url, role)")
+        .order("created_at", { ascending: false });
 
-    if (!artErr && artData) {
+      if (artErr || !artData) {
+        const { data: fallbackArts } = await supabase
+          .from("articles")
+          .select("*")
+          .order("created_at", { ascending: false });
+        artData = fallbackArts || [];
+      }
+
       setArticles(artData);
       const views = artData.reduce((acc, curr) => acc + (curr.views || 0), 0);
       setStats((prev) => ({ ...prev, totalArticles: artData.length, totalViews: views }));
-    } else {
-      const { data: fallbackArts } = await supabase
-        .from("articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (fallbackArts) setArticles(fallbackArts);
+    } catch (err) {
+      console.error("Errore articoli:", err);
     }
 
-    // 2. Utenti e Profili
-    const { data: usrData } = await supabase
-      .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    // 2. Fetch Utenti e Profili (con fallback sicuro)
+    try {
+      let { data: usrData, error: usrErr } = await supabase
+        .from("profiles")
+        .select("*");
 
-    if (usrData) {
+      if (usrErr || !usrData) {
+        usrData = [];
+      } else {
+        usrData.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+      }
+
       setUsersList(usrData);
       setStats((prev) => ({ ...prev, totalUsers: usrData.length }));
+    } catch (err) {
+      console.error("Errore utenti:", err);
     }
 
-    // 3. Sondaggio Attivo
-    const { data: pollData } = await supabase
-      .from("vox_populi")
-      .select("*")
-      .eq("is_active", true)
-      .maybeSingle();
+    // 3. Fetch Sondaggio Attivo
+    try {
+      const { data: pollData } = await supabase
+        .from("vox_populi")
+        .select("*")
+        .eq("is_active", true)
+        .maybeSingle();
 
-    if (pollData) setActivePoll(pollData);
+      if (pollData) setActivePoll(pollData);
+    } catch (err) {
+      console.error("Errore sondaggio:", err);
+    }
 
-    // 4. Feedback
-    const { data: fbData } = await supabase
-      .from("feedback")
-      .select("*, profiles:user_id(nickname, email)")
-      .order("created_at", { ascending: false });
+    // 4. Fetch Feedback (con fallback SENZA JOIN se la relazione fallisce)
+    try {
+      let { data: fbData, error: fbErr } = await supabase
+        .from("feedback")
+        .select("*, profiles:user_id(nickname, email)")
+        .order("created_at", { ascending: false });
 
-    if (fbData) {
+      // Se la join fallisce (FK mancante o user_id null), fa il fallback alla tabella feedback pura
+      if (fbErr || !fbData) {
+        const { data: simpleFb } = await supabase
+          .from("feedback")
+          .select("*")
+          .order("created_at", { ascending: false });
+        fbData = simpleFb || [];
+      }
+
       setFeedbacksList(fbData);
       const unread = fbData.filter((f) => !f.is_read).length;
       setStats((prev) => ({ 
@@ -104,6 +128,8 @@ export default function AdminPanelPage() {
         totalFeedbacks: fbData.length, 
         unreadFeedbacks: unread 
       }));
+    } catch (err) {
+      console.error("Errore feedback:", err);
     }
   }, []);
 
@@ -111,34 +137,46 @@ export default function AdminPanelPage() {
     let channel;
 
     async function initAdmin() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return router.replace("/login");
+      try {
+        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+        const currentUser = session?.user;
 
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+        if (!currentUser || sessionErr) {
+          return router.replace("/login");
+        }
 
-      if (prof?.role !== "admin") {
-        alert("⛔ Accesso riservato esclusivamente all'Amministratore.");
-        return router.replace("/");
+        const isMainAdminEmail = currentUser.email?.toLowerCase() === "pierdavide.coppi@gmail.com";
+
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        const userRole = prof?.role?.toLowerCase()?.trim();
+
+        if (userRole === "admin" || isMainAdminEmail) {
+          setIsAdmin(true);
+          await fetchAllData();
+          setLoading(false);
+        } else {
+          alert("⛔ Accesso riservato esclusivamente all'Amministratore.");
+          return router.replace("/");
+        }
+
+        const channelName = `admin-live-${Math.random().toString(36).substring(2, 9)}`;
+
+        channel = supabase
+          .channel(channelName)
+          .on("postgres_changes", { event: "*", schema: "public", table: "feedback" }, () => fetchAllData())
+          .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => fetchAllData())
+          .on("postgres_changes", { event: "*", schema: "public", table: "vox_populi" }, () => fetchAllData())
+          .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchAllData())
+          .subscribe();
+      } catch (err) {
+        console.error("❌ Errore verifica admin:", err);
+        router.replace("/");
       }
-
-      setIsAdmin(true);
-      await fetchAllData();
-      setLoading(false);
-
-      // Nome canale univoco per evitare errori di rinnovo in Next.js Fast Refresh
-      const channelName = `admin-live-${Math.random().toString(36).substring(2, 9)}`;
-
-      channel = supabase
-        .channel(channelName)
-        .on("postgres_changes", { event: "*", schema: "public", table: "feedback" }, () => fetchAllData())
-        .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => fetchAllData())
-        .on("postgres_changes", { event: "*", schema: "public", table: "vox_populi" }, () => fetchAllData())
-        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchAllData())
-        .subscribe();
     }
 
     initAdmin();
@@ -178,7 +216,6 @@ export default function AdminPanelPage() {
 
     if (!confirm(`Confermi l'assegnazione del ruolo '${newRole.toUpperCase()}'?`)) return;
 
-    // Aggiornamento ottimistico dello stato locale
     setUsersList((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
     );
@@ -493,54 +530,61 @@ export default function AdminPanelPage() {
       {activeTab === "users" && (
         <section className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl">
           <div className="space-y-3">
-            {filteredUsers.map((usr, index) => (
-              <div key={usr.id} className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-zinc-700 transition">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-bold text-zinc-500 w-6">#{index + 1}</span>
-                  <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {usr.avatar_url ? (
-                      <img src={usr.avatar_url} alt={usr.nickname} className="w-full h-full object-cover" />
+            {filteredUsers.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-xs">
+                Nessun utente trovato.
+              </div>
+            ) : (
+              filteredUsers.map((usr, index) => (
+                <div key={usr.id} className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-zinc-700 transition">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono font-bold text-zinc-500 w-6">#{index + 1}</span>
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center font-bold text-white text-sm shrink-0">
+                      {usr.avatar_url && usr.avatar_url !== "EMPTY" ? (
+                        <img src={usr.avatar_url} alt={usr.nickname} className="w-full h-full object-cover" />
+                      ) : (
+                        (usr.nickname || usr.email || "U")[0].toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-white text-sm">{usr.nickname || "Utente Senza Nome"}</p>
+                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${
+                          usr.role === "admin" ? "bg-red-950/80 text-red-400 border-red-800/80" :
+                          usr.role === "caporedattore" ? "bg-purple-950/80 text-purple-300 border-purple-800/80" :
+                          usr.role === "redattore" ? "bg-[#C5A46D]/20 text-[#D4B47C] border-[#C5A46D]/40" :
+                          "bg-zinc-800 text-zinc-400 border-zinc-700"
+                        }`}>
+                          {usr.role || "studente"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-500 font-mono">{usr.email || "Email non presente"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <span className="text-xs text-zinc-500 mr-2">Ruolo:</span>
+                    {usr.email === "pierdavide.coppi@gmail.com" ? (
+                      <span className="bg-red-950/80 text-red-400 border border-red-800/80 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 shadow">
+                        <Shield size={13} /> Admin Principale (Protetto)
+                      </span>
                     ) : (
-                      (usr.nickname || usr.email || "U")[0].toUpperCase()
+                      <select
+                        value={usr.role || "studente"}
+                        onChange={(e) => updateUserRole(usr.id, usr.email, e.target.value)}
+                        className="bg-zinc-900 border border-zinc-700 text-xs font-bold text-white rounded-xl px-3 py-2 focus:outline-none focus:border-[#C5A46D] transition"
+                      >
+                        <option value="studente">🎓 Studente</option>
+                        <option value="user">🎓 Studente (User)</option>
+                        <option value="redattore">✍️ Redattore</option>
+                        <option value="caporedattore">👑 Caporedattore</option>
+                        <option value="admin">🛡️ Admin</option>
+                      </select>
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-white text-sm">{usr.nickname || "Utente Senza Nome"}</p>
-                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${
-                        usr.role === "admin" ? "bg-red-950/80 text-red-400 border-red-800/80" :
-                        usr.role === "caporedattore" ? "bg-purple-950/80 text-purple-300 border-purple-800/80" :
-                        usr.role === "redattore" ? "bg-[#C5A46D]/20 text-[#D4B47C] border-[#C5A46D]/40" :
-                        "bg-zinc-800 text-zinc-400 border-zinc-700"
-                      }`}>
-                        {usr.role || "studente"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500 font-mono">{usr.email || "Email non presente"}</p>
-                  </div>
                 </div>
-
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                  <span className="text-xs text-zinc-500 mr-2">Ruolo:</span>
-                  {usr.email === "pierdavide.coppi@gmail.com" ? (
-                    <span className="bg-red-950/80 text-red-400 border border-red-800/80 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 shadow">
-                      <Shield size={13} /> Admin Principale (Protetto)
-                    </span>
-                  ) : (
-                    <select
-                      value={usr.role || "studente"}
-                      onChange={(e) => updateUserRole(usr.id, usr.email, e.target.value)}
-                      className="bg-zinc-900 border border-zinc-700 text-xs font-bold text-white rounded-xl px-3 py-2 focus:outline-none focus:border-[#C5A46D] transition"
-                    >
-                      <option value="studente">🎓 Studente</option>
-                      <option value="redattore">✍️ Redattore</option>
-                      <option value="caporedattore">👑 Caporedattore</option>
-                      <option value="admin">🛡️ Admin</option>
-                    </select>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       )}
