@@ -7,12 +7,13 @@ import { supabase } from "../../lib/supabase";
 export default function ProfiloPage() {
   const router = useRouter();
   
-  // Dati Utente
+  // Dati Utente & Profilo da Supabase
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bio, setBio] = useState("");
+  const [role, setRole] = useState("redattore");
   
   // Dati Articoli
   const [articles, setArticles] = useState([]);
@@ -48,14 +49,22 @@ export default function ProfiloPage() {
         setUser(user);
         setEmail(user.email ?? "");
         
-        // Recupera metadati utente
-        const currentNick = user.user_metadata?.nickname || user.email?.split("@")[0] || "Utente";
-        const currentAvatar = user.user_metadata?.avatar_url || "";
-        const currentBio = user.user_metadata?.bio || "Redattore per la testata digitale Salvemini Times.";
+        // Recupera profilo reale e dinamico dalla tabella 'profiles'
+        const { data: profData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        const currentNick = profData?.nickname || user.user_metadata?.nickname || user.email?.split("@")[0] || "Utente";
+        const currentAvatar = profData?.avatar_url || user.user_metadata?.avatar_url || "";
+        const currentBio = profData?.bio || user.user_metadata?.bio || "Redattore per la testata digitale Salvemini Times.";
+        const currentRole = profData?.role || "redattore";
         
         setNickname(currentNick);
         setAvatarUrl(currentAvatar);
         setBio(currentBio);
+        setRole(currentRole);
         
         setNewNickname(currentNick);
         setNewAvatarUrl(currentAvatar);
@@ -95,13 +104,24 @@ export default function ProfiloPage() {
     }
   }
 
-  // Salvataggio Modifica Profilo
+  // Salvataggio Modifica Profilo dinamico su Supabase
   async function handleSaveProfile(e) {
     e.preventDefault();
     setSavingProfile(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      // 1. Aggiorna la tabella 'profiles'
+      const { error: profError } = await supabase
+        .from("profiles")
+        .update({
+          nickname: newNickname,
+          avatar_url: newAvatarUrl,
+          bio: newBio,
+        })
+        .eq("id", user.id);
+
+      // 2. Sincronizza i metadati di autenticazione
+      await supabase.auth.updateUser({
         data: {
           nickname: newNickname,
           avatar_url: newAvatarUrl,
@@ -109,8 +129,8 @@ export default function ProfiloPage() {
         },
       });
 
-      if (error) {
-        alert("⚠️ Errore aggiornamento profilo: " + error.message);
+      if (profError) {
+        alert("⚠️ Errore aggiornamento profilo: " + profError.message);
       } else {
         setNickname(newNickname);
         setAvatarUrl(newAvatarUrl);
@@ -146,6 +166,16 @@ export default function ProfiloPage() {
     const { error } = await supabase.auth.signOut();
     if (!error) router.replace("/login");
   }
+
+  // Mappatura dinamica delle etichette del ruolo
+  const roleBadgeMap = {
+    admin: { label: "Amministratore", icon: "🛡️", color: "bg-red-950/80 text-red-300 border-red-800/80" },
+    caporedattore: { label: "Caporedattore", icon: "👑", color: "bg-purple-950/80 text-purple-300 border-purple-800/80" },
+    redattore: { label: "Redattore", icon: "✍️", color: "bg-[#C5A46D]/15 text-[#D4B47C] border-[#C5A46D]/30" },
+    studente: { label: "Studente", icon: "🎓", color: "bg-zinc-800 text-zinc-300 border-zinc-700" },
+  };
+
+  const currentRoleBadge = roleBadgeMap[role] || roleBadgeMap.redattore;
 
   // Filtro articoli in base a tab e ricerca
   const filteredArticles = articles.filter((art) => {
@@ -201,7 +231,7 @@ export default function ProfiloPage() {
         </div>
       </nav>
 
-      {/* HERO PROFILO EDITORIALE */}
+      {/* HERO PROFILO EDITORIALE DINAMICO */}
       <section className="relative overflow-hidden bg-gradient-to-b from-zinc-900/90 via-zinc-900/50 to-zinc-950 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C5A46D]/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -237,8 +267,9 @@ export default function ProfiloPage() {
                   {nickname}
                 </h1>
                 
-                <span className="bg-[#C5A46D]/15 text-[#D4B47C] border border-[#C5A46D]/30 px-3 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1">
-                  <span>👑</span> Caporedattore
+                {/* Badge Ruolo Dinamico */}
+                <span className={`${currentRoleBadge.color} px-3 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 border`}>
+                  <span>{currentRoleBadge.icon}</span> {currentRoleBadge.label}
                 </span>
               </div>
 
@@ -283,14 +314,14 @@ export default function ProfiloPage() {
         <div className="mt-8 pt-6 border-t border-zinc-800/80 space-y-2">
           <div className="flex justify-between items-center text-xs font-medium">
             <span className="text-zinc-400 flex items-center gap-1.5">
-              <span>⚡</span> Livello Redattore: <strong className="text-white">Livello 8</strong>
+              <span>⚡</span> Ruolo Attivo: <strong className="text-white">{currentRoleBadge.label}</strong>
             </span>
-            <span className="text-[#D4B47C]">2,450 / 3,000 XP (82%)</span>
+            <span className="text-[#D4B47C]">{publishedCount} Articoli Pubblicati</span>
           </div>
           <div className="w-full h-2.5 bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
             <div
               className="h-full bg-gradient-to-r from-[#997B45] to-[#D4B47C] rounded-full transition-all duration-500"
-              style={{ width: "82%" }}
+              style={{ width: `${Math.min(100, publishedCount * 10)}%` }}
             />
           </div>
         </div>
@@ -299,9 +330,9 @@ export default function ProfiloPage() {
       {/* METRICHE E STATISTICHE EDITORIALI */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Articoli Pubblicati", value: publishedCount, icon: "📰", trend: "+2 nell'ultimo mese", color: "from-amber-500/10" },
+          { label: "Articoli Pubblicati", value: publishedCount, icon: "📰", trend: "Contenuti approvati", color: "from-amber-500/10" },
           { label: "Bozze in Lavorazione", value: draftCount, icon: "📝", trend: "Pronte da completare", color: "from-blue-500/10" },
-          { label: "Visualizzazioni Totali", value: "14.2K", icon: "👁️", trend: "+1.5k lettori attivi", color: "from-emerald-500/10" },
+          { label: "Visualizzazioni Totali", value: articles.reduce((acc, a) => acc + (a.views || 0), 0), icon: "👁️", trend: "Lettori attivi", color: "from-emerald-500/10" },
           { label: "Tasso Apprezzamento", value: "98%", icon: "❤️", trend: "Feedback della community", color: "from-purple-500/10" },
         ].map((stat, idx) => (
           <div
@@ -541,42 +572,6 @@ export default function ProfiloPage() {
           </div>
         )}
 
-      </section>
-
-      {/* TRAGUARDI E BADGE EDITORIALI */}
-      <section className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-          <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span>🏅</span> Traguardi & Riconoscimenti
-            </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">Sblocca nuovi badge scrivendo articoli per il giornale.</p>
-          </div>
-          <span className="text-xs text-[#D4B47C] font-semibold bg-[#C5A46D]/10 px-3 py-1 rounded-full border border-[#C5A46D]/20">
-            5 / 12 Sbloccati
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {[
-            { title: "Primo Articolo", desc: "Debutto nel giornale", icon: "🎖️" },
-            { title: "100 Like", desc: "Comunità entusiasta", icon: "❤️" },
-            { title: "1K Lettori", desc: "Articolo virale", icon: "👁️" },
-            { title: "Inviato Speciale", desc: "Reportage completo", icon: "📸" },
-            { title: "Piuma d'Oro", desc: "Membro d'Eccellenza", icon: "👑" },
-          ].map((badge, idx) => (
-            <div
-              key={idx}
-              className="bg-zinc-950/80 border border-zinc-800/80 hover:border-[#C5A46D]/40 rounded-2xl p-4 flex flex-col items-center text-center transition group shadow-md"
-            >
-              <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                {badge.icon}
-              </span>
-              <p className="text-xs font-bold text-zinc-200">{badge.title}</p>
-              <p className="text-[10px] text-zinc-500 mt-1">{badge.desc}</p>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* MODALE DI MODIFICA PROFILO */}

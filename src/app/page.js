@@ -35,6 +35,43 @@ import {
   Eye,
 } from "lucide-react";
 
+function Logo({ className = "h-9 w-auto" }) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="200" height="200" fill="#0A0A0A" rx="32" />
+      <text
+        x="100"
+        y="95"
+        fontFamily="'Georgia', 'Times New Roman', serif"
+        fontSize="92"
+        fontWeight="bold"
+        fill="#C5A46D"
+        textAnchor="middle"
+        dominantBaseline="central"
+      >
+        S.
+      </text>
+      <text
+        x="104"
+        y="152"
+        fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+        fontSize="20"
+        fontWeight="700"
+        letterSpacing="9"
+        fill="#A1A1AA"
+        textAnchor="middle"
+      >
+        TIMES
+      </text>
+    </svg>
+  );
+}
+
 function getDeviceId() {
   if (typeof window === "undefined") return "server-id";
   let deviceId = localStorage.getItem("salvemini_device_id");
@@ -65,11 +102,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   // Algoritmo YouTube & Player Video
-  const [videoFilter, setVideoFilter] = useState("algo"); // 'algo' | 'popular' | 'latest'
+  const [videoFilter, setVideoFilter] = useState("algo");
   const [selectedVideoModal, setSelectedVideoModal] = useState(null);
   const [userLikedVideos, setUserLikedVideos] = useState({});
 
-  // Categorie riservate unicamente agli articoli di testo
   const categories = [
     "Tutti",
     "Gossip",
@@ -189,14 +225,12 @@ export default function HomePage() {
     fetchHoroscopeData(hasExam);
   };
 
-  // 1. Tutti e soli gli articoli di TESTO (escludendo completamente i video)
   const textOnlyArticles = useMemo(() => {
     return articles.filter(
       (a) => !a.is_video && a.category !== "Video" && !a.video_url
     );
   }, [articles]);
 
-  // 2. Articolo in Evidenza (scelto ESCLUSIVAMENTE tra gli articoli di testo)
   const trendingArticle = useMemo(() => {
     if (textOnlyArticles.length === 0) return null;
     return (
@@ -205,7 +239,6 @@ export default function HomePage() {
     );
   }, [textOnlyArticles]);
 
-  // 3. Griglia principale degli articoli di testo con ricerca e filtri per categoria
   const filteredArticles = useMemo(() => {
     return textOnlyArticles.filter((art) => {
       const matchesCat = selectedCategory === "Tutti" || art.category === selectedCategory;
@@ -220,7 +253,6 @@ export default function HomePage() {
     });
   }, [textOnlyArticles, selectedCategory, searchQuery]);
 
-  // 4. Sezione riservata unicamente ai VIDEO (100% isolata e gestita dall'Algoritmo YouTube)
   const rankedVideoArticles = useMemo(() => {
     const realVideos = articles.filter(
       (a) => (a.is_video || a.category === "Video" || a.video_url) && a.video_url
@@ -364,7 +396,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* SIDEBAR REATTIVA E FISSA DURANTE LO SCROLL */}
+      {/* SIDEBAR */}
       <aside
         className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#111111] border-r border-zinc-800/80 transition-all duration-300 flex flex-col shrink-0 self-start ${
           sidebarOpen ? "w-64 translate-x-0" : "-translate-x-full md:translate-x-0 md:w-20"
@@ -378,10 +410,13 @@ export default function HomePage() {
             <Menu size={22} />
           </button>
 
-          {sidebarOpen && (
-            <Link href="/" className="flex flex-col leading-none">
-              <span className="text-[#C5A46D] text-2xl font-serif font-bold tracking-tight">S.</span>
-              <span className="text-[9px] text-zinc-500 tracking-[0.3em] uppercase font-sans">Times</span>
+          {sidebarOpen ? (
+            <Link href="/" className="flex items-center gap-2">
+              <Logo className="h-8 w-auto" />
+            </Link>
+          ) : (
+            <Link href="/" className="hidden md:block">
+              <Logo className="h-7 w-auto" />
             </Link>
           )}
         </div>
@@ -432,7 +467,7 @@ export default function HomePage() {
       {/* CONTENUTO PRINCIPALE */}
       <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
-        {/* NAVBAR */}
+        {/* NAVBAR (mostra solo il titolo in testo Serif per evitare doppi loghi con la Sidebar) */}
         <header className="h-16 border-b border-zinc-800/80 flex items-center justify-between px-4 sm:px-8 bg-[#0A0A0A]/90 backdrop-blur sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
@@ -442,7 +477,7 @@ export default function HomePage() {
               <Menu size={22} />
             </button>
 
-            <Link href="/">
+            <Link href="/" className="flex items-center">
               <h1 className="text-xl sm:text-2xl font-serif font-bold text-[#C5A46D] tracking-wide">
                 Salvemini Times
               </h1>
@@ -497,11 +532,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* HERO TRENDING + VOX POPULI (SOLO ARTICOLI DI TESTO) */}
+        {/* HERO TRENDING + VOX POPULI */}
         <section className="px-4 sm:px-8 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-stretch">
             
-            {/* TRENDING ARTICLE DI TESTO */}
             {trendingArticle ? (
               <Link href={`/articolo/${trendingArticle.id}`} className="group block h-full">
                 <div className="h-full rounded-3xl bg-[#151515] border border-zinc-800 p-5 sm:p-8 flex flex-col justify-between hover:border-[#C5A46D]/60 transition-all duration-300 shadow-xl relative overflow-hidden">
@@ -561,7 +595,6 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* VOX POPULI SONDAGGIO DINAMICO */}
             <div id="vox-populi" className="rounded-3xl bg-[#151515] border border-zinc-800 p-5 sm:p-8 flex flex-col justify-between shadow-md">
               {activePoll ? (
                 <>
@@ -642,7 +675,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* WIDGET OROSCOPO SCOLASTICO INTERATTIVO */}
+        {/* WIDGET OROSCOPO SCOLASTICO */}
         <section className="px-4 sm:px-8 pt-6">
           <div className="bg-[#151515] border border-zinc-800/80 rounded-3xl p-5 sm:p-6 space-y-4 shadow-lg">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
@@ -701,7 +734,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 🎬 SEZIONE RISERVATA ESCLUSIVAMENTE AI VIDEO (SALVEMINI TV) */}
+        {/* SALVEMINI TV */}
         <section id="salvemini-tv" className="px-4 sm:px-8 pt-6">
           <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
             
@@ -711,7 +744,7 @@ export default function HomePage() {
                   <Video size={16} />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-white tracking-wide flex items-center gap-1.5">
+                  <h3 className="text-sm font-bold text-[#C5A46D] tracking-wide flex items-center gap-1.5">
                     Salvemini TV & Reels
                     <span className="bg-red-500/20 text-red-400 text-[9px] px-2 py-0.5 rounded-full font-mono font-bold uppercase border border-red-500/30">
                       YouTube Engine
@@ -751,7 +784,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* MOSTRA SOLO VIDEO REALI SUPABASE O AVVISO SE VUOTO */}
             {rankedVideoArticles.length === 0 ? (
               <div className="py-12 px-4 text-center bg-[#0A0A0C] border border-zinc-800/80 rounded-xl space-y-3">
                 <Video size={32} className="mx-auto text-zinc-600" />
@@ -819,7 +851,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 📺 CINEMA PLAYER MODAL PER I VIDEO */}
+        {/* CINEMA PLAYER MODAL */}
         {selectedVideoModal && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
             <div className="bg-[#121215] border border-zinc-800 rounded-3xl max-w-5xl w-full overflow-hidden shadow-2xl relative my-auto">
@@ -912,7 +944,7 @@ export default function HomePage() {
                       </div>
 
                       <div className="text-right font-mono text-[11px]">
-                        <p className="text-zinc-300">{selectedVideoModal.views || 0} visualizzazioni</p>
+                        <p className="text-[#C5A46D] font-bold">{selectedVideoModal.views || 0} visualizzazioni</p>
                         <p className="text-zinc-500">{new Date(selectedVideoModal.created_at || Date.now()).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -976,7 +1008,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* GRIGLIA ARTICOLI COMPLETA (SOLO ARTICOLI DI TESTO) */}
+        {/* GRIGLIA ARTICOLI */}
         <section className="px-4 sm:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-xl sm:text-2xl font-serif text-[#C5A46D] font-bold">
