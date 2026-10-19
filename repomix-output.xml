@@ -1,0 +1,1441 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+public/
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+src/
+  app/
+    classifica/
+      page.js
+    login/
+      page.js
+    profilo/
+      page.js
+    redazione/
+      page.js
+    register/
+      page.js
+    favicon.ico
+    globals.css
+    layout.js
+    page.js
+  lib/
+    supabase.js
+.gitignore
+eslint.config.mjs
+jsconfig.json
+next.config.mjs
+package.json
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="src/app/classifica/page.js">
+export default function ClassificaPage() {
+  const ranking = [
+    {
+      username: "Pier",
+      xp: 2450,
+      level: 8,
+    },
+    {
+      username: "Marco",
+      xp: 2100,
+      level: 7,
+    },
+    {
+      username: "Sara",
+      xp: 1800,
+      level: 6,
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-8">
+
+      <h1 className="text-4xl text-[#C5A46D] mb-8">
+        🏆 Classifica Redattori
+      </h1>
+
+      <div className="space-y-4">
+
+        {ranking.map((user, index) => (
+          <div
+            key={index}
+            className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-6 flex justify-between items-center"
+          >
+            <div>
+              <p className="text-2xl">
+                {index + 1}. {user.username}
+              </p>
+
+              <p className="text-zinc-400">
+                Livello {user.level}
+              </p>
+            </div>
+
+            <div className="text-[#C5A46D] text-2xl">
+              {user.xp} XP
+            </div>
+          </div>
+        ))}
+
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/login/page.js">
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        router.replace("/profilo");
+      }
+    }
+
+    checkUser();
+  }, [router]);
+
+  async function handleLogin() {
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    router.replace("/profilo");
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] text-white">
+      <div className="bg-[#1A1A1A] border border-zinc-800 rounded-3xl p-8 w-[420px]">
+
+        <h1 className="text-3xl font-bold text-[#C5A46D] mb-2">
+          Campus Voice
+        </h1>
+
+        <p className="text-zinc-400 mb-6">
+          Accedi al tuo account
+        </p>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 mb-4"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 mb-6"
+        />
+
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full bg-[#C5A46D] text-black py-3 rounded-xl font-semibold hover:opacity-90"
+        >
+          {loading ? "Accesso..." : "Accedi"}
+        </button>
+
+        <button
+          onClick={() => router.push("/register")}
+          className="w-full mt-4 bg-zinc-800 py-3 rounded-xl hover:bg-zinc-700"
+        >
+          Registrati
+        </button>
+
+        <button
+          onClick={() => router.push("/")}
+          className="w-full mt-4 border border-zinc-700 py-3 rounded-xl hover:bg-zinc-800 transition"
+        >
+          ← Torna alla Home
+        </button>
+
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/profilo/page.js">
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
+
+export default function ProfiloPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUser() {
+      try {
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+
+        if (!isMounted) return;
+      console.log("USER:", user);
+console.log("ERROR:", error);
+
+if (!user) {
+  setLoading(false);
+  return;
+}
+
+        setEmail(user.email ?? "");
+        setLoading(false);
+      } catch {
+        if (isMounted) router.replace("/login");
+      }
+    }
+
+    loadUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (!error) router.replace("/login");
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] p-8 text-white" aria-live="polite">
+        Caricamento profilo...
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-8">
+
+      {/* HERO PROFILO */}
+      <div className="bg-[#1A1A1A] border border-zinc-800 rounded-3xl p-8">
+
+        <div className="flex items-center gap-6">
+
+          <div className="w-24 h-24 rounded-full bg-[#C5A46D] flex items-center justify-center text-black text-3xl font-bold">
+            P
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-bold">
+  {email || "Caricamento..."}
+</h1>
+
+<div className="mt-3 flex gap-2">
+  <span className="bg-[#C5A46D] text-black px-3 py-1 rounded-full text-sm font-semibold">
+    Reporter
+  </span>
+
+  <span className="bg-zinc-800 px-3 py-1 rounded-full text-sm">
+    Livello 8
+  </span>
+</div>
+          </div>
+
+        </div>
+
+        <div className="mt-8">
+          <div className="flex justify-between mb-2">
+            <span>2450 XP</span>
+            <span>3000 XP</span>
+          </div>
+          <div className="mt-6">
+  <button
+    onClick={handleLogout}
+    className="bg-red-600 hover:bg-red-500 px-5 py-2 rounded-xl transition"
+  >
+    Logout
+  </button>
+</div>
+
+          <div className="w-full h-4 bg-zinc-800 rounded-full overflow-hidden">
+
+            <div
+              className="h-full bg-[#C5A46D]"
+              style={{ width: "82%" }}
+            />
+
+          </div>
+        </div>
+
+      </div>
+
+      {/* STATISTICHE */}
+      <div className="grid md:grid-cols-4 gap-6 mt-8">
+
+        <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-zinc-800">
+
+          <p className="text-zinc-500">
+            Articoli
+          </p>
+
+          <h2 className="text-4xl mt-2">
+            📰 23
+          </h2>
+
+        </div>
+
+        <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-zinc-800">
+
+          <p className="text-zinc-500">
+            Visualizzazioni
+          </p>
+
+          <h2 className="text-4xl mt-2">
+            👁️ 12.8K
+          </h2>
+
+        </div>
+
+        <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-zinc-800">
+
+          <p className="text-zinc-500">
+            Like
+          </p>
+
+          <h2 className="text-4xl mt-2">
+            ❤️ 1.2K
+          </h2>
+
+        </div>
+
+        <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-zinc-800">
+
+          <p className="text-zinc-500">
+            Badge
+          </p>
+
+          <h2 className="text-4xl mt-2">
+            🏅 5
+          </h2>
+
+        </div>
+
+      </div>
+
+      {/* REDAZIONE */}
+      <div className="bg-[#1A1A1A] border border-zinc-800 rounded-3xl p-8 mt-8">
+
+        <div className="flex justify-between items-center">
+
+          <h2 className="text-2xl font-bold">
+            📄 Redazione
+          </h2>
+
+          <button className="bg-[#C5A46D] text-black px-6 py-3 rounded-xl font-semibold">
+            Carica Documento
+          </button>
+
+        </div>
+
+        <div className="mt-6 text-zinc-500">
+          <div className="space-y-3">
+
+  <div className="bg-zinc-900 p-4 rounded-xl">
+    📄 Nessun documento caricato
+  </div>
+
+  <div className="text-zinc-500 text-sm">
+    I documenti PDF e Word caricati 
+        </div>
+
+      </div>
+      </div>
+      </div>
+
+      {/* BADGE */}
+      <div className="bg-[#1A1A1A] border border-zinc-800 rounded-3xl p-8 mt-8">
+
+        <h2 className="text-2xl font-bold mb-6">
+          🏅 Badge Ottenuti
+        </h2>
+
+        <div className="flex flex-wrap gap-4">
+
+          <div className="bg-zinc-900 px-4 py-3 rounded-xl">
+            🎖 Primo Articolo
+          </div>
+
+          <div className="bg-zinc-900 px-4 py-3 rounded-xl">
+            ❤️ 100 Like
+          </div>
+
+          <div className="bg-zinc-900 px-4 py-3 rounded-xl">
+            👁️ 1000 Visualizzazioni
+          </div>
+
+          <div className="bg-zinc-900 px-4 py-3 rounded-xl">
+            🔥 Articolo Virale
+          </div>
+
+          <div className="bg-zinc-900 px-4 py-3 rounded-xl">
+            👑 Voce della Scuola
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/redazione/page.js">
+"use client";
+
+import { useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+
+export default function RedazionePage() {
+  const onDrop = useCallback((acceptedFiles) => {
+    console.log("File caricati:", acceptedFiles);
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+    },
+    onDrop,
+  });
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-8">
+
+      <h1 className="text-4xl text-[#C5A46D] mb-8">
+        Redazione
+      </h1>
+
+      <div
+        {...getRootProps()}
+        className="border-2 border-dashed border-[#C5A46D] rounded-3xl p-16 text-center bg-[#111111] cursor-pointer hover:bg-[#151515] transition"
+      >
+        <input {...getInputProps()} />
+
+        <h2 className="text-2xl mb-4">
+          📄 Carica Word o PDF
+        </h2>
+
+        <p className="text-zinc-400">
+          Trascina qui il documento oppure clicca
+        </p>
+      </div>
+
+    </div>
+  );
+}
+``
+</file>
+
+<file path="src/app/register/page.js">
+"use client";
+
+import { useState } from "react";
+import { supabase } from "../../lib/supabase";
+
+export default function RegisterPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleRegister() {
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Account creato con successo!");
+
+    window.location.href = "/login";
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] text-white">
+      <div className="bg-[#1A1A1A] p-8 rounded-3xl w-[400px] border border-zinc-800">
+
+        <h1 className="text-3xl font-bold text-[#C5A46D] mb-2">
+          Campus Voice
+        </h1>
+
+        <p className="text-zinc-400 mb-6">
+          Crea il tuo account redattore
+        </p>
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-3 bg-zinc-900 rounded-xl mb-4 border border-zinc-700"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-3 bg-zinc-900 rounded-xl mb-6 border border-zinc-700"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={handleRegister}
+          disabled={loading}
+          className="w-full bg-[#C5A46D] text-black p-3 rounded-xl font-bold hover:opacity-90 transition"
+        >
+          {loading ? "Registrazione..." : "Registrati"}
+        </button>
+
+        <button
+          onClick={() => (window.location.href = "/login")}
+          className="w-full mt-4 bg-zinc-800 p-3 rounded-xl hover:bg-zinc-700 transition"
+        >
+          Hai già un account?
+        </button>
+
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/globals.css">
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+</file>
+
+<file path="src/app/layout.js">
+import { Playfair_Display } from "next/font/google";
+import "./globals.css";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "Campus Voice",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="it">
+      <body className={playfair.className}>
+        {children}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="src/app/page.js">
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { supabase } from "../lib/supabase";
+import {
+  Menu,
+  Search,
+  Flame,
+  Globe,
+  School,
+  Landmark,
+  Cpu,
+  Vote,
+  MessageSquare,
+  Heart,
+  Calendar,
+  Gamepad2,
+  Music,
+  Film,
+  Trophy,
+  User,
+  Medal,
+  Newspaper,
+  ChevronRight,
+  Clock,
+  X,
+  Play,
+  TrendingUp,
+} from "lucide-react";
+
+export default function HomePage() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Tutti");
+  const [voted, setVoted] = useState(false);
+  const [pollVotes, setPollVotes] = useState({ yes: 62, no: 38, total: 128 });
+
+  // Gestione Auth Supabase
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user ?? null);
+        });
+
+        return () => subscription?.unsubscribe();
+      } catch (err) {
+        console.warn("Gestione sessione Supabase:", err);
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  const categories = [
+    "Tutti",
+    "Attualità",
+    "Vita scolastica",
+    "Tecnologia",
+    "Sport",
+    "Cultura",
+    "Interviste",
+    "Eventi",
+  ];
+
+  // Lista articoli estesa con copertine, visualizzazioni e flag trending
+  const articles = [
+    {
+      id: 1,
+      title: "L'intelligenza artificiale entra nella didattica del Liceo",
+      subtitle: "Vox discipulorum: la rivoluzione digitale nelle aule.",
+      summary:
+        "Analisi sull'impatto dei nuovi modelli generativi nelle aule scolastiche: risorse, sfide e opinioni di studenti e docenti.",
+      category: "Tecnologia",
+      author: "Redazione",
+      time: "8 min",
+      views: 1420,
+      isTrending: true,
+      date: "VENERDÌ 18 OTTOBRE MMXXVI",
+      coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      title: "Inaugurato il nuovo laboratorio STEM al Salvemini",
+      summary:
+        "Attrezzature all'avanguardia per la robotica e il calcolo ad alte prestazioni a disposizione delle classi prime.",
+      category: "Vita scolastica",
+      author: "Pier",
+      time: "4 min",
+      views: 890,
+      isTrending: false,
+      coverUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop",
+    },
+    {
+      id: 3,
+      title: "Torneo d'Istituto di basket: al via le fasi eliminatorie",
+      summary:
+        "Squadre pronte a disputare le selezioni per le finali di fine quadrimestre. Tutte le date e i gironi.",
+      category: "Sport",
+      author: "Redazione",
+      time: "5 min",
+      views: 1100,
+      isTrending: false,
+      coverUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=600&auto=format&fit=crop",
+    },
+    {
+      id: 4,
+      title: "Assemblea d'Istituto: approvato il piano eventi della Primavera",
+      summary:
+        "Dai concerti acustici ai dibattiti sull'attualità geopolitica: ecco le iniziative votate dagli studenti.",
+      category: "Eventi",
+      author: "Comitato Studentesco",
+      time: "6 min",
+      views: 640,
+      isTrending: false,
+      coverUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=600&auto=format&fit=crop",
+    },
+    {
+      id: 5,
+      title: "Scuola e democrazia: il dibattito sulla rappresentanza",
+      summary:
+        "Riflessione critica sul ruolo della partecipazione attiva nelle istituzioni scolastiche di oggi.",
+      category: "Attualità",
+      author: "Elena M.",
+      time: "7 min",
+      views: 520,
+      isTrending: false,
+      coverUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=600&auto=format&fit=crop",
+    },
+  ];
+
+  // Algoritmo di selezione dell'articolo di tendenza (stile YouTube top trending)
+  const trendingArticle = useMemo(() => {
+    return (
+      articles.find((a) => a.isTrending) ||
+      [...articles].sort((a, b) => b.views - a.views)[0]
+    );
+  }, [articles]);
+
+  const navigationSections = [
+    {
+      title: "ESPLORA",
+      items: [
+        { icon: School, label: "Vita scolastica", category: "Vita scolastica" },
+        { icon: Newspaper, label: "Attualità", category: "Attualità" },
+        { icon: Landmark, label: "Politica", category: "Politica" },
+        { icon: Globe, label: "Mondo", category: "Mondo" },
+        { icon: Cpu, label: "Tecnologia", category: "Tecnologia" },
+      ],
+    },
+    {
+      title: "STUDENTI",
+      items: [
+        { icon: Vote, label: "Vox Populi", href: "#vox-populi" },
+        { icon: MessageSquare, label: "Rumors", href: "#" },
+        { icon: Heart, label: "Relazioni", href: "#" },
+        { icon: Calendar, label: "Eventi", category: "Eventi" },
+      ],
+    },
+    {
+      title: "INTRATTENIMENTO",
+      items: [
+        { icon: Gamepad2, label: "Gaming", category: "Gaming" },
+        { icon: Music, label: "Musica", category: "Musica" },
+        { icon: Film, label: "Cinema e Serie", category: "Cinema" },
+        { icon: Trophy, label: "Sport", category: "Sport" },
+      ],
+    },
+    {
+      title: "ACCOUNT",
+      items: [
+        { icon: User, label: "Profilo", href: "/profilo" },
+        { icon: Medal, label: "Classifica", href: "/classifica" },
+      ],
+    },
+  ];
+
+  const filteredArticles = useMemo(() => {
+    return articles.filter((article) => {
+      const matchesCategory =
+        selectedCategory === "Tutti" || article.category === selectedCategory;
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.author.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  const handleVote = (option) => {
+    if (voted) return;
+    setVoted(true);
+    setPollVotes((prev) => ({
+      ...prev,
+      total: prev.total + 1,
+      yes: option === "yes" ? prev.yes + 1 : prev.yes,
+      no: option === "no" ? prev.no + 1 : prev.no,
+    }));
+  };
+
+  return (
+    <div className="flex min-h-screen bg-[#0A0A0A] text-white font-sans antialiased">
+      {/* SIDEBAR */}
+      <aside
+        className={`${
+          sidebarOpen ? "w-64" : "w-20"
+        } bg-[#111111] border-r border-zinc-800/80 transition-all duration-300 flex flex-col shrink-0 sticky top-0 h-screen z-30`}
+      >
+        <div className="p-4 flex items-center justify-between border-b border-zinc-800/60 h-16">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800/60 transition"
+            aria-label="Toggle Sidebar"
+          >
+            <Menu size={22} />
+          </button>
+
+          {sidebarOpen && (
+            <Link href="/" className="flex flex-col leading-none">
+              <span className="text-[#C5A46D] text-2xl font-serif font-bold tracking-tight">
+                S.
+              </span>
+              <span className="text-[9px] text-zinc-500 tracking-[0.3em] uppercase font-sans">
+                Times
+              </span>
+            </Link>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar">
+          {navigationSections.map((section, idx) => (
+            <div key={idx} className="space-y-1">
+              {sidebarOpen && (
+                <h4 className="px-3 text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A46D] font-bold mb-2">
+                  {section.title}
+                </h4>
+              )}
+
+              {section.items.map((item) => {
+                const isCategory = !!item.category;
+                const isActive =
+                  isCategory && selectedCategory === item.category;
+
+                const content = (
+                  <div
+                    onClick={() => {
+                      if (isCategory) setSelectedCategory(item.category);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer ${
+                      isActive
+                        ? "bg-[#C5A46D]/15 text-[#C5A46D] border border-[#C5A46D]/30"
+                        : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50"
+                    }`}
+                  >
+                    <item.icon
+                      size={18}
+                      className={isActive ? "text-[#C5A46D]" : "text-zinc-400"}
+                    />
+                    {sidebarOpen && <span>{item.label}</span>}
+                  </div>
+                );
+
+                return item.href ? (
+                  <Link key={item.label} href={item.href}>
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={item.label}>{content}</div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* CONTENUTO PRINCIPALE */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* NAVBAR */}
+        <header className="h-16 border-b border-zinc-800/80 flex items-center justify-between px-8 bg-[#0A0A0A]/90 backdrop-blur sticky top-0 z-20">
+          <Link href="/" className="group">
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-[#C5A46D] tracking-wide group-hover:opacity-90 transition">
+              Salvemini Times
+            </h1>
+          </Link>
+
+          {user ? (
+            <Link href="/profilo">
+              <div className="w-10 h-10 rounded-full bg-[#C5A46D] text-black font-serif font-bold flex items-center justify-center hover:scale-105 transition shadow-sm">
+                {user.email?.charAt(0).toUpperCase()}
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="px-5 py-2 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-sm font-medium transition border border-zinc-700/50"
+            >
+              Accedi
+            </Link>
+          )}
+        </header>
+
+        {/* BARRA DI RICERCA */}
+        <div className="px-8 pt-6 pb-2">
+          <div className="relative max-w-3xl">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="🔍 Cerca articoli, eventi, studenti..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#151515] border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl pl-12 pr-10 py-3.5 text-sm focus:outline-none focus:border-[#C5A46D]/80 transition shadow-inner"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-1"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* HERO (67% - TRENDING ALGORITMICO + COPERTINA) + VOX POPULI (33%) */}
+        <section className="px-8 pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-stretch">
+            
+            {/* IN EVIDENZA: SCHEDA CLICCABILE CON ANTEPRIMA COPERTINA */}
+            <Link
+              href={`/articolo/${trendingArticle.id}`}
+              className="group block h-full"
+            >
+              <div className="h-full rounded-3xl bg-[#151515] border border-zinc-800 p-6 sm:p-8 flex flex-col justify-between hover:border-[#C5A46D]/60 transition-all duration-300 shadow-xl relative overflow-hidden">
+                <div>
+                  {/* COPERTINA ANTEPRIMA / PREVIEW */}
+                  <div className="relative w-full h-60 sm:h-72 rounded-2xl overflow-hidden mb-6 bg-zinc-900 border border-zinc-800/80 group-hover:scale-[1.01] transition-transform duration-500">
+                    <img
+                      src={trendingArticle.coverUrl}
+                      alt={trendingArticle.title}
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-95 transition-opacity duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/40" />
+
+                    {/* BADGE TRENDING / IN EVIDENZA STILE YOUTUBE */}
+                    <div className="absolute top-4 left-4 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 bg-[#C5A46D] text-black font-bold text-xs px-3.5 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
+                        <Flame size={14} className="fill-black" />
+                        #1 In Evidenza
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-black/70 backdrop-blur text-white text-xs px-3 py-1 rounded-full font-mono border border-white/10">
+                        <TrendingUp size={12} className="text-[#C5A46D]" />
+                        {trendingArticle.views} letture
+                      </span>
+                    </div>
+
+                    {/* DATA / DATASTAMP */}
+                    <div className="absolute bottom-3 left-4 text-[10px] font-mono tracking-widest text-[#C5A46D] uppercase bg-black/60 backdrop-blur px-2.5 py-1 rounded-md border border-white/5">
+                      {trendingArticle.date}
+                    </div>
+
+                    {/* PULSANTE RIPRODUZIONE / LETTURA RAPIDA */}
+                    <div className="absolute right-4 bottom-3 w-10 h-10 rounded-full bg-[#C5A46D] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play size={18} className="fill-black ml-0.5" />
+                    </div>
+                  </div>
+
+                  {/* TITOLO E SOTTOTITOLO */}
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif leading-tight group-hover:text-[#C5A46D] transition-colors duration-300">
+                    {trendingArticle.title}
+                  </h1>
+                  {trendingArticle.subtitle && (
+                    <h2 className="text-[#C5A46D] text-xl sm:text-2xl font-serif mt-2 italic">
+                      {trendingArticle.subtitle}
+                    </h2>
+                  )}
+
+                  <p className="mt-4 text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl line-clamp-2">
+                    {trendingArticle.summary}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500">
+                  <span className="flex items-center gap-2">
+                    <span className="text-zinc-300 font-medium">
+                      {trendingArticle.category}
+                    </span>
+                    <span>•</span>
+                    <span>{trendingArticle.time} di lettura</span>
+                    <span>•</span>
+                    <span>Salvemini Times</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[#C5A46D] font-semibold group-hover:translate-x-1.5 transition-transform">
+                    Leggi ora <ChevronRight size={14} />
+                  </span>
+                </div>
+              </div>
+            </Link>
+
+            {/* VOX POPULI SONDAGGIO */}
+            <div
+              id="vox-populi"
+              className="rounded-3xl bg-[#151515] border border-zinc-800 p-6 sm:p-8 flex flex-col justify-between shadow-md"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="uppercase tracking-[0.25em] text-xs font-bold text-[#C5A46D]">
+                    Vox Populi
+                  </span>
+                  <span className="text-xs text-zinc-500 font-mono">Sondaggio</span>
+                </div>
+
+                <h3 className="text-xl font-serif font-medium leading-snug mb-6 text-zinc-100">
+                  La settimana corta su 5 giorni migliorerebbe la scuola?
+                </h3>
+
+                <div className="space-y-5">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-zinc-200">SÌ</span>
+                      <span className="text-[#C5A46D]">{pollVotes.yes}%</span>
+                    </div>
+                    <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#C5A46D] rounded-full transition-all duration-500"
+                        style={{ width: `${pollVotes.yes}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-zinc-200">NO</span>
+                      <span className="text-zinc-400">{pollVotes.no}%</span>
+                    </div>
+                    <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-zinc-600 rounded-full transition-all duration-500"
+                        style={{ width: `${pollVotes.no}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-zinc-800/80">
+                <div className="text-xs text-zinc-500 mb-4 flex items-center gap-1.5">
+                  <span>🗳 {pollVotes.total} voti registrati</span>
+                </div>
+
+                {voted ? (
+                  <p className="text-center text-xs text-[#C5A46D] font-medium py-2 bg-[#C5A46D]/10 rounded-xl">
+                    ✓ Voto salvato
+                  </p>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleVote("yes")}
+                      className="flex-1 bg-[#C5A46D] hover:bg-[#b3925c] text-black py-2.5 rounded-xl font-semibold text-sm transition"
+                    >
+                      Vota SÌ
+                    </button>
+                    <button
+                      onClick={() => handleVote("no")}
+                      className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl font-semibold text-sm transition"
+                    >
+                      Vota NO
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TRENDING TICKER EDITORIALE */}
+        <section className="px-8 py-6">
+          <div className="bg-[#151515]/60 border border-zinc-800/80 rounded-2xl p-3.5 flex items-center gap-4 overflow-x-auto no-scrollbar">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#C5A46D] whitespace-nowrap flex items-center gap-1.5 shrink-0 border-r border-zinc-800/80 pr-4">
+              <Flame size={15} /> Trending
+            </span>
+            <div className="flex items-center gap-6 text-sm text-zinc-300 whitespace-nowrap">
+              {[
+                "🔥 Open Day",
+                "🔥 Torneo d'istituto",
+                "🔥 Assemblea",
+                "🔥 Playlist studenti",
+                "🔥 Laboratori STEM",
+              ].map((item, idx) => (
+                <span
+                  key={idx}
+                  className="hover:text-[#C5A46D] cursor-pointer transition flex items-center gap-2 font-medium"
+                >
+                  {item}
+                  {idx < 4 && <span className="text-zinc-700 ml-2">•</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ULTIMI ARTICOLI CON FILTRI */}
+        <section className="px-8 pb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2 className="text-2xl font-serif text-[#C5A46D] font-bold">
+              Ultimi Articoli
+            </h2>
+
+            {/* CHIP FILTRI CATEGORIE */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                    selectedCategory === cat
+                      ? "bg-[#C5A46D] text-black font-semibold shadow-sm"
+                      : "bg-[#151515] border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* GRIGLIA ARTICOLI */}
+          {filteredArticles.length === 0 ? (
+            <div className="p-12 text-center text-zinc-500 bg-[#151515] rounded-3xl border border-zinc-800">
+              Nessun articolo trovato per i filtri selezionati.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredArticles.map((article) => (
+                <Link key={article.id} href={`/articolo/${article.id}`}>
+                  <div className="bg-[#151515] rounded-3xl overflow-hidden border border-zinc-800 hover:border-[#C5A46D]/60 hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col group">
+                    <div className="h-48 relative overflow-hidden bg-zinc-900">
+                      <img
+                        src={article.coverUrl}
+                        alt={article.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-black/20" />
+                      <span className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-wider text-[#C5A46D] bg-[#111111]/80 backdrop-blur px-3 py-1 rounded-full border border-zinc-800">
+                        {article.category}
+                      </span>
+                      <span className="absolute bottom-3 right-3 text-zinc-300 text-xs flex items-center gap-1 bg-black/60 backdrop-blur px-2.5 py-1 rounded-md font-mono border border-white/10">
+                        <Clock size={12} /> {article.time}
+                      </span>
+                    </div>
+
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-serif text-xl font-bold mb-3 group-hover:text-[#C5A46D] transition line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-zinc-400 text-sm line-clamp-2 leading-relaxed mb-4">
+                          {article.summary}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-500">
+                        <span>Di {article.author}</span>
+                        <span className="text-[#C5A46D] opacity-0 group-hover:opacity-100 transition-opacity font-medium flex items-center gap-1">
+                          Leggi <ChevronRight size={12} />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
+</file>
+
+<file path="src/lib/supabase.js">
+import { createClient } from "@supabase/supabase-js";
+
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="jsconfig.json">
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+</file>
+
+<file path="next.config.mjs">
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  /* config options here */
+  cacheComponents: true,
+  partialPrefetching: true,
+  reactCompiler: true,
+  turbopack: {
+    rules: {
+      "*.css": {
+        loaders: ["@tailwindcss/turbopack"],
+        as: "*.css",
+      },
+    },
+  },
+};
+
+export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "campus-voice",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "lucide-react": "^1.57.0",
+    "next": "16.4.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-dropzone": "^20.1.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.1",
+    "tailwindcss": "^4"
+  }
+}
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+</files>
