@@ -16,13 +16,25 @@ export default function FeedbackPage() {
     if (!content.trim()) return;
 
     setLoading(true);
-    const { error } = await supabase.from("feedbacks").insert([{ content, category }]);
+
+    // Recupera l'utente se loggato (opzionale)
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Tabella corretta: 'feedback' (singolare)
+    const { error } = await supabase.from("feedback").insert([
+      { 
+        content, 
+        category,
+        user_id: user?.id || null,
+        is_read: false
+      }
+    ]);
 
     if (!error) {
       setSent(true);
       setContent("");
     } else {
-      alert("Errore nell'invio del feedback.");
+      alert("⚠️ Errore nell'invio del feedback: " + error.message);
     }
     setLoading(false);
   };
@@ -90,7 +102,7 @@ export default function FeedbackPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#C5A46D] hover:bg-[#b3925c] text-black font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg"
+              className="w-full bg-[#C5A46D] hover:bg-[#b3925c] text-black font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
             >
               <Send size={14} /> {loading ? "Invio in corso..." : "Invia Messaggio Anonimo"}
             </button>
