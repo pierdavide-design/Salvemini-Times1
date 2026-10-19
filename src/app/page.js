@@ -189,10 +189,6 @@ export default function HomePage() {
     fetchHoroscopeData(hasExam);
   };
 
-  // -------------------------------------------------------------
-  // SEPARAZIONE NETTA: ARTICOLI DI TESTO vs CONTENUTI VIDEO
-  // -------------------------------------------------------------
-
   // 1. Tutti e soli gli articoli di TESTO (escludendo completamente i video)
   const textOnlyArticles = useMemo(() => {
     return articles.filter(
@@ -254,7 +250,6 @@ export default function HomePage() {
     return calculated.sort((a, b) => b.algoScore - a.algoScore);
   }, [articles, videoFilter]);
 
-  // Incremento visualizzazioni e riproduzione nel Cinema Player
   const handleOpenVideoPlayer = async (video) => {
     setSelectedVideoModal(video);
 
@@ -328,11 +323,12 @@ export default function HomePage() {
       ],
     },
     {
-      title: "COMMUNITY",
+      title: "COMMUNITY & EDICOLA",
       items: [
+        { icon: Newspaper, label: "Giornalino PDF", href: "/edicola" },
         { icon: Vote, label: "Vox Populi", href: "#vox-populi" },
         { icon: Video, label: "Video & Reels", href: "#salvemini-tv" },
-        { icon: MessageSquare, label: "Cultura", category: "Cultura" },
+        { icon: MessageSquare, label: "Feedback Anonimo", href: "/feedback" },
         { icon: Heart, label: "Interviste", category: "Interviste" },
         { icon: Calendar, label: "Eventi", category: "Eventi" },
       ],
@@ -359,7 +355,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0A0A0A] text-white font-sans antialiased overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#0A0A0A] text-white font-sans antialiased">
       
       {sidebarOpen && (
         <div
@@ -368,9 +364,9 @@ export default function HomePage() {
         />
       )}
 
-      {/* SIDEBAR REATTIVA */}
+      {/* SIDEBAR REATTIVA E FISSA DURANTE LO SCROLL */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#111111] border-r border-zinc-800/80 transition-all duration-300 flex flex-col shrink-0 ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#111111] border-r border-zinc-800/80 transition-all duration-300 flex flex-col shrink-0 self-start ${
           sidebarOpen ? "w-64 translate-x-0" : "-translate-x-full md:translate-x-0 md:w-20"
         }`}
       >
@@ -434,7 +430,7 @@ export default function HomePage() {
       </aside>
 
       {/* CONTENUTO PRINCIPALE */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
         {/* NAVBAR */}
         <header className="h-16 border-b border-zinc-800/80 flex items-center justify-between px-4 sm:px-8 bg-[#0A0A0A]/90 backdrop-blur sticky top-0 z-20">
