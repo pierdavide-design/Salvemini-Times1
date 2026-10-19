@@ -14,7 +14,7 @@ export async function GET(req) {
     const hasExam = searchParams.get("verifica") === "true";
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-3.5-flash-lite",
+      model: "gemini-1.5-flash",
       generationConfig: {
         temperature: 0.85,
         responseMimeType: "application/json",
@@ -35,7 +35,7 @@ Genera le previsioni per le 5 "Tribù Scolastiche":
 4. "I Rappresentanti" (Sempre in riunione)
 5. "Quelli dell'Ultimo Banco" (I filosofi della ricreazione)
 
-Restituisci TASSATIVAMENTE un array JSON:
+Restituisci TASSATIVAMENTE un array JSON con questa struttura esatta:
 [
   {
     "tribu": "Nome Tribù",
